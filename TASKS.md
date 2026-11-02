@@ -40,6 +40,8 @@
 - [x] M04 (3138b37) 警示中心
 - [x] M05 (3138b37) 浮標清單
 
+- [x] G01 周邊漁船活動改用 Global Fishing Watch（mock＝GFW 回應格式；live 待 Blanco 申請 token）
+
 ## M2 P1（目標 11/03 03:00）
 - [x] F12 (199c78d) 時間軸回放
 - [ ] F13 事件警示流

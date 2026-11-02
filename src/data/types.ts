@@ -112,3 +112,15 @@ export interface FleetSnapshot {
   positions: Position[]
   buoys: Buoy[]
 }
+
+/** 周邊漁船活動（GFW 4Wings 表觀捕魚努力量，etl/fetch_gfw.py 正規化後） */
+export interface FishingEffort {
+  mode: 'live' | 'mock'
+  dataset: string
+  dateRange: [string, string]
+  resolution: string
+  source: string
+  gears: string[]
+  /** [lon(0–360), lat, hours, gearIndex, vessels] */
+  cells: [number, number, number, number, number][]
+}

@@ -16,6 +16,7 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 - V04 互動：Ctrl／⌘ K 搜尋、上下鍵與 Enter 選船、空結果提示、Escape／外點關閉選單；地圖詳情直達航次／主檔並共用選船；新增縮放／總覽復位；航次補登按需展開，錯誤與成功回饋、防重複點擊；表格排序、航次事件與資料來源卡可鍵盤操作。熱區未實作，開關改標「規劃中」並停用。
 - V04 驗證：`npm run verify` 通過（26 測試＋型別＋建置），`git diff --check` 通過；`node scripts/ux-check.mjs` 的 10 組瀏覽器回歸通過，無 JS 執行錯誤／HTTP 失敗回應。驗證搜尋、跨頁選船、補登、主檔保存與 reload、警示、圖層、回放。六頁及 1600／1280／1024 桌面截圖已目視確認；輸出 `/tmp/pelagos-ux/`，最終總覽 `/tmp/pelagos-final.png`。最後微調面板不透明與浮標篩選標籤後已重跑 verify。SwiftShader 不代表真機效能；仍有既有 >500 kB chunk 提醒。
 - 回放速度（Claude，Blanco 要求）：改為可選「每秒快轉 10 分／30 分／1 小時」，預設 30 分（`store.Speed = 10 | 30 | 60`）；ux-check 10 項仍通過
+- **GFW 周邊漁船活動（Claude，Blanco 選 A 案）**：`etl/fetch_gfw.py` 有 live／mock 兩模式，**mock 直接輸出成 GFW 4Wings 回應格式**、與 live 走同一個 `normalize()` → `public/data/gfw_effort.json`。參數名來自 GFW 官方 Python SDK 原始碼（`spatial-resolution`、`group-by=GEARTYPE`、`datasets[0]=public-global-fishing-effort:latest`、`date-range`、Bearer token、body `geojson`）。**live 模式未實測**（沒有 token）。前端：`layers/gfw.ts` 紫粉熱度圖（預設開，漁具可篩）、資料串接頁 GFW 連線卡與說明面板、CI 排程有 `secrets.GFW_TOKEN` 才抓。原「周邊船隻 1 萬」壓力測試點移到展示模式（效能 HUD）
 - 本機 preview 保留於 `http://localhost:4173/pelagos/`，供 Blanco 審閱新版本。尚未 push、建遠端 repo 或部署；後續先依 Blanco 的 UI 反饋迭代。
 
 - T01 完成：骨架（types／grid／DataSource／store／tokens／MapView）；冒煙測試已用無頭瀏覽器截圖確認——deck.gl 9.4＋MapLibre 6 可畫、120°E／180°／200°E 的點與海溫跨換日線連續、洋流 canvas 夾在 MapLibre 與 deck 畫布之間

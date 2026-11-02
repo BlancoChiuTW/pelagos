@@ -9,7 +9,8 @@ import { dataUrl } from '../data/DataSource'
 import { guessMapping, parseCsv, parseGeoJson, type Table } from '../data/importer'
 import { normLon } from '../data/grid'
 import { useOverrides } from '../data/overrides'
-import type { FleetSnapshot, OceanGrid } from '../data/types'
+import type { FishingEffort, FleetSnapshot, OceanGrid } from '../data/types'
+import { GEAR_LABEL } from '../layers/gfw'
 import { fmtTime } from '../sim/labels'
 import { useStore } from '../store'
 import { Panel } from '../hud/Panel'
@@ -18,7 +19,7 @@ import s from './Page.module.css'
 type Map4 = { lon: number; lat: number; label: number; value: number }
 const day = (iso?: string) => (iso ? iso.slice(0, 10) : '—')
 
-type Key = 'noaa' | 'vms' | 'fad' | 'elog'
+type Key = 'noaa' | 'gfw' | 'vms' | 'fad' | 'elog'
 function Connector({ name, kind, status, rows, active, onClick }: { name: string; kind: string; status: [string, string]; rows: [string, string][]; active: boolean; onClick: () => void }) {
   return (
     <div role="button" tabIndex={0} aria-pressed={active} aria-label={name} onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }} style={{ padding: 18, borderRadius: 12, cursor: 'pointer', background: active ? 'rgba(125,219,211,.06)' : 'rgba(255,255,255,.02)', border: `1px solid ${active ? 'rgba(125,219,211,.4)' : 'var(--sep)'}` }}>
@@ -32,7 +33,7 @@ function Connector({ name, kind, status, rows, active, onClick }: { name: string
   )
 }
 
-export function DataHub({ grid, snap, now, fleet, trackStart }: { grid: OceanGrid | null; snap: FleetSnapshot | null; now: number; fleet: FleetItem[]; trackStart: number }) {
+export function DataHub({ grid, snap, now, fleet, trackStart, gfw }: { grid: OceanGrid | null; snap: FleetSnapshot | null; now: number; fleet: FleetItem[]; trackStart: number; gfw: FishingEffort | null }) {
   const imports = useOverrides((o) => o.imports)
   const addImport = useOverrides((o) => o.addImport)
   const removeImport = useOverrides((o) => o.removeImport)
@@ -125,6 +126,9 @@ export function DataHub({ grid, snap, now, fleet, trackStart }: { grid: OceanGri
         <div className={s.connectors}>
           <Connector active={active === 'noaa'} onClick={() => setActive('noaa')} name="NOAA 海況" kind="海溫 OISST v2.1 · 洋流 NESDIS SSH · ERDDAP" status={['已同步', 'var(--green)']}
             rows={[['海溫資料日', day(grid?.meta.sst.time)], ['洋流資料日', day(grid?.meta.u.time)], ['更新方式', '每日排程（GitHub Actions 跑 Python ETL）'], ['格式', 'Int16 網格＋PNG，跨換日線']]} />
+          <Connector active={active === 'gfw'} onClick={() => setActive('gfw')} name="Global Fishing Watch" kind="周邊漁船活動 · AIS 表觀捕魚努力量（4Wings API）"
+            status={gfw?.mode === 'live' ? ['已同步', 'var(--green)'] : ['模擬・待 token', 'var(--orange)']}
+            rows={[['資料期間', gfw ? `${gfw.dateRange[0]} ～ ${gfw.dateRange[1]}` : '—'], ['網格', gfw ? `${gfw.cells.length.toLocaleString()} 格 · ${gfw.resolution}` : '—'], ['更新方式', '每日排程（ETL 呼叫 GFW API）'], ['授權', '非商業用途，需 API token']]} />
           <Connector active={active === 'vms'} onClick={() => setActive('vms')} name="VMS 船位" kind="衛星船位回報（模擬）" status={['接收中', 'var(--green)']}
             rows={[['格式', 'NAF（North Atlantic Format）'], ['最後接收', vms.log[0] ? fmtTime(vms.log[0].at) : lastVms ? fmtTime(lastVms) : '—'], ['本次接收', `${vms.log.length} 筆`], ['正式來源', '漁業署 VMS／船上回報']]} />
           <Connector active={active === 'fad'} onClick={() => setActive('fad')} name="FAD 浮標平台" kind="衛星聲納浮標（模擬，Satlink／Zunibal 類）" status={['接收中', 'var(--green)']}
@@ -140,6 +144,38 @@ export function DataHub({ grid, snap, now, fleet, trackStart }: { grid: OceanGri
             mapping={[['buoyId ／ 欄1', '浮標.編號', ''], ['position.lat,lng ／ 欄4,5', '浮標.位置', 'B 廠小數逗號→點'], ['biomass.total_t ／ 欄6', '浮標.估計魚量（噸）', 'B 廠公斤÷1000'], ['ts ／ 欄2+3', '浮標.回報時間', '日/月/年 → ISO']]} />}
           {active === 'elog' && <InterfaceConsole title="電子漁獲日誌介面" desc="船端上傳 FLUX 下網報告；解析成功即寫入該船航次（到戰情地圖或航次管理可看到新事件）" feed={elog} auto={false}
             mapping={[['VesselTransportMeans/ID', '船舶主檔.漁船編號', '對到航次'], ['OccurrenceDateTime', '事件.時間', ''], ['RelatedFLUXLocation', '事件.位置', '±180 轉 0–360'], ['SpecifiedFACatch × n', '事件.漁獲（噸）', '各魚種公斤加總÷1000'], ['TypeCode=FISHING_OPERATION', '事件.類型＝下網', '']]} />}
+          {active === 'gfw' && (
+            <div>
+              <div className={s.section} style={{ marginTop: 0 }}>Global Fishing Watch 介面</div>
+              <div className={s.dim} style={{ marginBottom: 10 }}>
+                {gfw?.mode === 'live'
+                  ? '真實資料：由 GFW API 取得的 AIS 表觀捕魚努力量。'
+                  : '目前是模擬資料：格式與 GFW API 回應完全相同、走同一個解析器；取得 API token 後設為 CI 的 GFW_TOKEN，排程就會改抓真實資料，前端不用改。'}
+                GFW 資料約延遲 4–5 天；AIS 可被關閉、遠洋需衛星 AIS，所以這層代表「周邊漁船活動的熱度」，不是即時船位。自家船隊的即時位置仍以 VMS 為準。
+              </div>
+              <pre style={{ font: '12px/18px ui-monospace, monospace', padding: 12, borderRadius: 10, background: 'rgba(0,0,0,.35)', border: '0.5px solid var(--sep)', margin: '0 0 12px', whiteSpace: 'pre-wrap' }}>{`POST https://gateway.api.globalfishingwatch.org/v3/4wings/report
+  ?spatial-resolution=LOW&temporal-resolution=ENTIRE&group-by=GEARTYPE
+  &datasets[0]=public-global-fishing-effort:latest
+  &date-range=${gfw?.dateRange.join(',') ?? 'YYYY-MM-DD,YYYY-MM-DD'}&format=JSON
+Authorization: Bearer ＜token，只存在 CI secret＞
+body: { "geojson": 西／中太平洋多邊形（跨換日線拆兩塊） }
+
+→ { "entries": [ { "public-global-fishing-effort:v3.0": [ { lat, lon, hours, geartype, vesselIDs } … ] } ] }
+→ etl/fetch_gfw.py 正規化 → public/data/gfw_effort.json → 地圖「周邊漁船活動」熱度圖`}</pre>
+              {gfw && (
+                <table className={s.table} style={{ font: 'var(--t-footnote)' }}>
+                  <thead><tr><th>漁具（geartype）</th><th>格數</th><th>捕魚時數</th><th>船數（格內加總）</th></tr></thead>
+                  <tbody>
+                    {gfw.gears.map((g, gi) => {
+                      const cs = gfw.cells.filter((c) => c[3] === gi)
+                      if (!cs.length) return null
+                      return <tr key={g} style={{ cursor: 'default' }}><td>{GEAR_LABEL[g] ?? g} <span className={s.dim}>{g}</span></td><td>{cs.length.toLocaleString()}</td><td>{Math.round(cs.reduce((a, c) => a + c[2], 0)).toLocaleString()} 小時</td><td>{cs.reduce((a, c) => a + c[4], 0).toLocaleString()}</td></tr>
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
           {active === 'noaa' && (
             <div>
               <div className={s.section} style={{ marginTop: 0 }}>NOAA 海況管線</div>

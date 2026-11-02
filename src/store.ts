@@ -2,7 +2,7 @@
 import { create } from 'zustand'
 import type { Epoch } from './data/types'
 
-export type LayerKey = 'sst' | 'anomaly' | 'currents' | 'buoys' | 'others' | 'fleet' | 'hotspot' | 'track'
+export type LayerKey = 'sst' | 'anomaly' | 'currents' | 'buoys' | 'others' | 'fleet' | 'hotspot' | 'track' | 'gfw'
 export type OthersCount = 10000 | 50000 | 100000
 /** 回放速度：每秒快轉幾分鐘（10 分／30 分／1 小時，預設 30 分） */
 export type Speed = 10 | 30 | 60
@@ -14,6 +14,9 @@ const loadNow = Math.floor(Date.now() / HOUR) * HOUR // SIM_NOW：取整到小�
 
 export interface AppState {
   view: View
+  /** 周邊漁船活動的漁具篩選（'all' 或 GFW geartype） */
+  gfwGear: string
+  setGfwGear: (g: string) => void
   /** 展示模式：顯示效能 HUD 與壓力測試開關 */
   demoMode: boolean
   setView: (v: View) => void
@@ -52,8 +55,10 @@ export interface AppState {
 
 export const useStore = create<AppState>()((set) => ({
   // v3 減法：預設只開船隊＋航跡，海溫淡化當背景（PRD §15.3）
-  layers: { sst: true, anomaly: false, currents: false, buoys: false, others: false, fleet: true, hotspot: false, track: true },
+  layers: { sst: true, anomaly: false, currents: false, buoys: false, others: false, fleet: true, hotspot: false, track: true, gfw: true },
   view: 'map',
+  gfwGear: 'all',
+  setGfwGear: (gfwGear) => set({ gfwGear }),
   demoMode: false,
   setView: (view) => set({ view }),
   setDemoMode: (demoMode) => set({ demoMode }),

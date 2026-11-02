@@ -4,7 +4,7 @@ import { AnimatePresence } from 'motion/react'
 import { MapView, type MapHandles } from './map/MapView'
 import { buildLayers } from './map/layerStack'
 import { useMapZoom } from './map/useMapZoom'
-import { useOcean } from './data/useOcean'
+import { useFishingEffort, useOcean } from './data/useOcean'
 import { useFleetItems, useFleetSnapshot, type FleetItem } from './data/useFleet'
 import type { TripEvent } from './data/types'
 import { mountOceanRasters, setRasterVisible } from './layers/sst'
@@ -47,6 +47,8 @@ const tooltip = (info: PickingInfo) => {
 export default function App() {
   const [h, setHandles] = useState<MapHandles | null>(null)
   const ocean = useOcean()
+  const gfw = useFishingEffort()
+  const gfwGear = useStore((s) => s.gfwGear)
   const grid = ocean.state === 'ok' ? ocean.data : null
   const rawFlags = useStore((s) => s.layers)
   const stage = useStore((s) => s.introStage)
@@ -62,7 +64,7 @@ export default function App() {
 
   // 開機序列：依進度逐層點亮（X01）
   const layerFlags = useMemo(
-    () => ({ ...rawFlags, buoys: rawFlags.buoys && stage >= 3, others: rawFlags.others && stage >= 4, fleet: rawFlags.fleet && stage >= 4, track: rawFlags.track && stage >= 4 }),
+    () => ({ ...rawFlags, buoys: rawFlags.buoys && stage >= 3, others: rawFlags.others && stage >= 4, gfw: rawFlags.gfw && stage >= 3, fleet: rawFlags.fleet && stage >= 4, track: rawFlags.track && stage >= 4 }),
     [rawFlags, stage],
   )
 
@@ -124,8 +126,8 @@ export default function App() {
   }
 
   const layers = useMemo<Layer[]>(
-    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t, imports }),
-    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t, imports],
+    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t, imports, gfw, gfwGear }),
+    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t, imports, gfw, gfwGear],
   )
   const introDone = useCallback(() => setIntro('done'), [setIntro])
   const bootSteps = [
@@ -144,12 +146,12 @@ export default function App() {
       <div style={{ opacity: stage >= 5 ? 1 : 0, transition: 'opacity 0.6s', position: 'absolute', inset: 0, pointerEvents: 'none' }}>
         <Sidebar alerts={alertCount} />
         {onMap && <MapControls map={h?.map ?? null} />}
-        <Toolbar key={view} fleet={fleet} layers={<LayerPanel />} info={<InfoPanel grid={grid} />} />
+        <Toolbar key={view} fleet={fleet} layers={<LayerPanel gears={gfw?.gears ?? []} />} info={<InfoPanel grid={grid} />} />
         <Hud
           page={onMap ? undefined : view === 'vessels' ? <Vessels fleet={fleet} now={t} /> : view === 'trips' && snap ? <Trips fleet={fleet} snap={snap} now={t} onEvent={goEvent} />
               : view === 'alerts' ? <Alerts alerts={alerts} onLocate={locateAlert} />
               : view === 'buoys' && snap ? <Buoys snap={snap} fleet={fleet} trackStart={trackStart} now={t} onGo={goBuoy} />
-              : view === 'data' ? <DataHub grid={grid} snap={snap} now={t} fleet={fleet} trackStart={trackStart} />
+              : view === 'data' ? <DataHub grid={grid} snap={snap} now={t} fleet={fleet} trackStart={trackStart} gfw={gfw} />
               : <Placeholder view={view} />}
           right={
             <AnimatePresence mode="wait">

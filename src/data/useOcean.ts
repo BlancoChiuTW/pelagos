@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { dataSource } from './DataSource'
-import type { OceanGrid } from './types'
+import type { FishingEffort, OceanGrid } from './types'
 
 export type Loadable<T> = { state: 'loading' } | { state: 'ok'; data: T } | { state: 'error'; error: string }
 
@@ -16,6 +16,15 @@ export function useOcean(): Loadable<OceanGrid> {
     return () => {
       alive = false
     }
+  }, [])
+  return v
+}
+
+/** 周邊漁船活動（GFW）；載入失敗只關掉這層 */
+export function useFishingEffort(): FishingEffort | null {
+  const [v, setV] = useState<FishingEffort | null>(null)
+  useEffect(() => {
+    dataSource.loadFishingEffort().then(setV).catch(() => setV(null))
   }, [])
   return v
 }

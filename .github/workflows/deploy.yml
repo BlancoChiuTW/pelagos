@@ -28,6 +28,12 @@ jobs:
         if: github.event_name == 'schedule'
         continue-on-error: true
         run: uv run etl/fetch_ocean.py
+      - name: 更新 GFW 周邊漁船活動（排程且有 token 時）
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        env:
+          GFW_TOKEN: ${{ secrets.GFW_TOKEN }}
+        run: if [ -n "$GFW_TOKEN" ]; then uv run etl/fetch_gfw.py; else echo "沒有 GFW_TOKEN，沿用 repo 內資料"; fi
       - run: npm ci
       - run: npm run verify
       - uses: actions/upload-pages-artifact@v3

@@ -31,6 +31,8 @@ const COUNTS: OthersCount[] = [10000, 50000, 100000]
 export function PerfHud({ points, fps }: { points: number; fps: number }) {
   const count = useStore((st) => st.othersCount)
   const setCount = useStore((st) => st.setOthersCount)
+  const on = useStore((st) => st.layers.others)
+  const setLayer = useStore((st) => st.setLayer)
   const color = fps >= 50 ? 'var(--ok)' : fps >= 30 ? 'var(--warn)' : 'var(--alert)'
   return (
     <Panel title="效能" en="PERFORMANCE" className={s.perf}>
@@ -40,10 +42,11 @@ export function PerfHud({ points, fps }: { points: number; fps: number }) {
       </div>
       <div className={s.btns}>
         {COUNTS.map((c) => (
-          <button key={c} className={s.btn} aria-pressed={c === count} onClick={() => setCount(c)}>{c / 10000} 萬</button>
+          <button key={c} className={s.btn} aria-pressed={on && c === count} onClick={() => { setCount(c); setLayer('others', true) }}>{c / 10000} 萬</button>
         ))}
       </div>
-      <div className={s.note}>周邊船數（壓力測試，非實際船數）· Web Worker＋二進位傳輸</div>
+      <div className={s.btns}><button className={s.btn} aria-pressed={!on} onClick={() => setLayer('others', false)}>關閉壓力測試點</button></div>
+      <div className={s.note}>壓力測試點：非實際船數（WCPFC 區大型圍網約 332 艘，ISSF 2025）· Web Worker＋二進位傳輸</div>
     </Panel>
   )
 }
