@@ -4,8 +4,8 @@ import type { Epoch } from './data/types'
 
 export type LayerKey = 'sst' | 'anomaly' | 'currents' | 'buoys' | 'others' | 'fleet' | 'hotspot' | 'track'
 export type OthersCount = 10000 | 50000 | 100000
-/** 回放倍速：每秒前進幾分鐘 */
-export type Speed = 1 | 10 | 60
+/** 回放速度：每秒快轉幾分鐘（10 分／30 分／1 小時，預設 30 分） */
+export type Speed = 10 | 30 | 60
 export type FxQuality = 'high' | 'low'
 export type View = 'map' | 'vessels' | 'trips' | 'buoys' | 'alerts' | 'data'
 
@@ -59,7 +59,7 @@ export const useStore = create<AppState>()((set) => ({
   setDemoMode: (demoMode) => set({ demoMode }),
   othersCount: 10000,
   selectedVesselId: null,
-  time: { now: loadNow, cursor: loadNow, playing: false, speed: 10 },
+  time: { now: loadNow, cursor: loadNow, playing: false, speed: 30 },
   online: typeof navigator === 'undefined' ? true : navigator.onLine,
   scrub: null,
   replayOpen: false,

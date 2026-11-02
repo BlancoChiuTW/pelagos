@@ -1,4 +1,4 @@
-// 回放（F12）：平時收起；從工具列「回放」或詳情卡「回放航跡」展開。拖動回放過去 24 小時，播放 1／10／60 分鐘每秒
+// 回放（F12）：平時收起；從工具列「回放」或詳情卡「回放航跡」展開。拖動回放過去 24 小時，每秒快轉 10 分／30 分／1 小時（預設 30 分，24 小時約 48 秒播完）
 // 實務用途：事後調查（訊號中斷前往哪開、哪裡下網、越界爭議），不是常駐看板元素
 import { useEffect } from 'react'
 import { HOUR } from '../sim/geo'
@@ -7,7 +7,7 @@ import { useStore, type Speed } from '../store'
 import { Panel } from './Panel'
 import s from './TimeBar.module.css'
 
-const SPEEDS: Speed[] = [1, 10, 60]
+const SPEEDS: [Speed, string][] = [[10, '10 分'], [30, '30 分'], [60, '1 小時']]
 
 export function TimeBar({ live }: { live: number }) {
   const scrub = useStore((st) => st.scrub)
@@ -48,7 +48,12 @@ export function TimeBar({ live }: { live: number }) {
         <input className={s.range} aria-label="回放時間" type="range" min={start} max={live} step={60_000} value={t}
           onChange={(e) => { pause(); const v = Number(e.target.value); setScrub(v >= live - 60_000 ? null : v) }} />
       </div>
-      <button className={s.speed} onClick={() => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length])}>{speed} 分/秒</button>
+      <div className={s.speeds} role="radiogroup" aria-label="每秒快轉">
+        <span className={s.speedLabel}>每秒快轉</span>
+        {SPEEDS.map(([v, l]) => (
+          <button key={v} role="radio" aria-checked={speed === v} className={s.speed} onClick={() => setSpeed(v)}>{l}</button>
+        ))}
+      </div>
       <button className={s.live} aria-pressed={scrub === null} onClick={() => { pause(); setScrub(null) }}>即時</button>
       <button className={s.play} aria-label="關閉回放" onClick={() => { pause(); setScrub(null); useStore.getState().setReplayOpen(false) }}>
         <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 2l8 8M10 2 2 10" stroke="currentColor" strokeWidth="1.6" /></svg>

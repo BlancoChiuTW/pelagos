@@ -15,6 +15,7 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 - V04 視覺：深藍／青綠 token、品牌側欄、六頁共用頂欄、重整 KPI 與船隊清單、管理表格及詳情面板；海溫透明度 0.30，管理頁隱藏但不卸載地圖。1250px 以下側欄收成圖示，950px 以下管理頁上下排列；桌面驗收，未宣稱完成手機版。
 - V04 互動：Ctrl／⌘ K 搜尋、上下鍵與 Enter 選船、空結果提示、Escape／外點關閉選單；地圖詳情直達航次／主檔並共用選船；新增縮放／總覽復位；航次補登按需展開，錯誤與成功回饋、防重複點擊；表格排序、航次事件與資料來源卡可鍵盤操作。熱區未實作，開關改標「規劃中」並停用。
 - V04 驗證：`npm run verify` 通過（26 測試＋型別＋建置），`git diff --check` 通過；`node scripts/ux-check.mjs` 的 10 組瀏覽器回歸通過，無 JS 執行錯誤／HTTP 失敗回應。驗證搜尋、跨頁選船、補登、主檔保存與 reload、警示、圖層、回放。六頁及 1600／1280／1024 桌面截圖已目視確認；輸出 `/tmp/pelagos-ux/`，最終總覽 `/tmp/pelagos-final.png`。最後微調面板不透明與浮標篩選標籤後已重跑 verify。SwiftShader 不代表真機效能；仍有既有 >500 kB chunk 提醒。
+- 回放速度（Claude，Blanco 要求）：改為可選「每秒快轉 10 分／30 分／1 小時」，預設 30 分（`store.Speed = 10 | 30 | 60`）；ux-check 10 項仍通過
 - 本機 preview 保留於 `http://localhost:4173/pelagos/`，供 Blanco 審閱新版本。尚未 push、建遠端 repo 或部署；後續先依 Blanco 的 UI 反饋迭代。
 
 - T01 完成：骨架（types／grid／DataSource／store／tokens／MapView）；冒煙測試已用無頭瀏覽器截圖確認——deck.gl 9.4＋MapLibre 6 可畫、120°E／180°／200°E 的點與海溫跨換日線連續、洋流 canvas 夾在 MapLibre 與 deck 畫布之間
