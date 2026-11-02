@@ -41,3 +41,19 @@ export function buildAlerts(fleet: FleetItem[], snap: FleetSnapshot, now: Epoch)
   const rank = { alert: 0, warn: 1, info: 2 }
   return out.sort((a, b) => rank[a.level] - rank[b.level] || b.at - a.at)
 }
+
+/** 同業動態（GFW）：近期疑似海上轉載 → 通知（不計入徽章，非自家船） */
+export function activityAlerts(events: import('../data/types').ActivityEvent[]): Alert[] {
+  return events
+    .filter((e) => e.kind === 'encounter' && e.encounterType === 'transshipment')
+    .slice(0, 12)
+    .map((e) => ({
+      id: `gfw-enc:${e.id}`,
+      level: 'info' as const,
+      at: Date.parse(e.start),
+      lon: e.lon,
+      lat: e.lat,
+      title: '同業疑似海上轉載（GFW）',
+      body: `運搬船與漁船海上相遇（船籍 ${(e.flags ?? [e.flag]).join('／') || '未知'}）。WCPFC 規定圍網船只能在港內轉載`,
+    }))
+}

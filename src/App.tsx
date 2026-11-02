@@ -4,9 +4,10 @@ import { AnimatePresence } from 'motion/react'
 import { MapView, type MapHandles } from './map/MapView'
 import { buildLayers } from './map/layerStack'
 import { useMapZoom } from './map/useMapZoom'
-import { useFishingEffort, useOcean, usePorts } from './data/useOcean'
+import { useActivity, useFishingEffort, useOcean, usePorts } from './data/useOcean'
 import { useFleetItems, useFleetSnapshot, type FleetItem } from './data/useFleet'
-import type { Port, TripEvent } from './data/types'
+import type { ActivityEvent, Port, TripEvent } from './data/types'
+import { ACTIVITY_LABEL } from './layers/activity'
 import { mountOceanRasters, setRasterVisible } from './layers/sst'
 import { showGfw } from './layers/gfwRaster'
 import { CurrentsCanvas } from './layers/currents/CurrentsCanvas'
@@ -33,13 +34,19 @@ import { Vessels } from './pages/Vessels'
 import { Trips } from './pages/Trips'
 import { Alerts } from './pages/Alerts'
 import { Buoys } from './pages/Buoys'
-import { buildAlerts } from './sim/alerts'
+import { activityAlerts, buildAlerts } from './sim/alerts'
 import { DataHub } from './pages/DataHub'
 import { useOverrides } from './data/overrides'
 import type { Alert } from './data/types'
 
 // 滑過船隻的小卡（V02）
 const tooltip = (info: PickingInfo) => {
+  const ev = info.object as ActivityEvent | undefined
+  if (ev && 'kind' in ev && ev.kind) {
+    const when = new Date(ev.start).toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' })
+    const what = ev.kind === 'encounter' ? (ev.encounterType === 'transshipment' ? '運搬船與漁船相遇（疑似海上轉載）' : '加油船與漁船相遇（海上補給）') : ev.kind === 'loitering' ? `運搬船徘徊 ${ev.hours} 小時` : `AIS 關閉 ${ev.hours} 小時`
+    return { html: `<b>${ACTIVITY_LABEL[ev.kind]}</b><br/>${what}<br/>${when}・船籍 ${(ev.flags ?? [ev.flag]).join('／') || '—'}<br/><span style="opacity:.6">資料：Global Fishing Watch</span>` }
+  }
   const port = info.object as Port | undefined
   if (port && 'visits' in port) {
     const flags = port.topFlags.map(([f, n]) => `${f} ${n}`).join('、')
@@ -55,6 +62,8 @@ export default function App() {
   const ocean = useOcean()
   const gfw = useFishingEffort()
   const portStats = usePorts()
+  const activityData = useActivity()
+  const activity = useMemo(() => activityData?.events ?? [], [activityData])
   const ports = useMemo(() => portStats?.ports ?? [], [portStats])
   const gfwGear = useStore((s) => s.gfwGear)
   const grid = ocean.state === 'ok' ? ocean.data : null
@@ -72,7 +81,7 @@ export default function App() {
 
   // 開機序列：依進度逐層點亮（X01）
   const layerFlags = useMemo(
-    () => ({ ...rawFlags, buoys: rawFlags.buoys && stage >= 3, others: rawFlags.others && stage >= 4, gfw: rawFlags.gfw && stage >= 3, ports: rawFlags.ports && stage >= 3, fleet: rawFlags.fleet && stage >= 4, track: rawFlags.track && stage >= 4 }),
+    () => ({ ...rawFlags, buoys: rawFlags.buoys && stage >= 3, others: rawFlags.others && stage >= 4, gfw: rawFlags.gfw && stage >= 3, ports: rawFlags.ports && stage >= 3, activity: rawFlags.activity && stage >= 3, fleet: rawFlags.fleet && stage >= 4, track: rawFlags.track && stage >= 4 }),
     [rawFlags, stage],
   )
 
@@ -122,7 +131,7 @@ export default function App() {
   }
   const fps = useFps()
   const points = (others?.count ?? 0) + (buoys?.n ?? 0) + fleet.length
-  const alerts = useMemo(() => (snap ? buildAlerts(fleet, snap, t) : []), [fleet, snap, t])
+  const alerts = useMemo(() => (snap ? [...buildAlerts(fleet, snap, t), ...activityAlerts(activity)] : []), [fleet, snap, t, activity])
   const ack = useOverrides((o) => o.ack)
   const imports = useOverrides((o) => o.imports)
   const alertCount = alerts.filter((a) => a.level !== 'info' && !ack[a.id]).length
@@ -140,8 +149,8 @@ export default function App() {
   }
 
   const layers = useMemo<Layer[]>(
-    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t, imports, ports }),
-    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t, imports, ports],
+    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t, imports, ports, activity }),
+    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t, imports, ports, activity],
   )
   const introDone = useCallback(() => setIntro('done'), [setIntro])
   const bootSteps = [

@@ -139,3 +139,19 @@ export interface Port {
   medianHrs: number | null
 }
 export interface PortStats { mode: 'live' | 'mock'; dataset: string; dateRange: [string, string]; source: string; ports: Port[] }
+
+/** 可疑活動（GFW 事件：相遇／徘徊／AIS 刻意關閉；etl/fetch_events.py） */
+export interface ActivityEvent {
+  id: string
+  kind: 'encounter' | 'loitering' | 'gap'
+  lat: Lat
+  lon: Lon
+  start: string
+  end: string
+  flag: string
+  vesselType: string
+  encounterType?: 'transshipment' | 'bunkering'
+  flags?: string[]
+  hours?: number
+}
+export interface ActivityEvents { mode: 'live'; dateRange: [string, string]; source: string; events: ActivityEvent[] }

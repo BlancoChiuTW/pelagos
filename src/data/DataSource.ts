@@ -1,7 +1,7 @@
 // 資料介面（TECH_SPEC §5）。畫面與圖層只透過這裡拿資料；之後換 API 只改這個檔。
 import { decodeI16 } from './grid'
 import { seed } from '../sim/seed'
-import type { Epoch, FieldMeta, FishingEffort, PortStats, FleetSnapshot, GridMeta, OceanGrid } from './types'
+import type { ActivityEvents, Epoch, FieldMeta, FishingEffort, PortStats, FleetSnapshot, GridMeta, OceanGrid } from './types'
 
 export interface DataSource {
   loadOcean(): Promise<OceanGrid>
@@ -10,6 +10,8 @@ export interface DataSource {
   loadFishingEffort(): Promise<FishingEffort>
   /** 港口與停靠站（GFW 進港事件彙整） */
   loadPorts(): Promise<PortStats>
+  /** 可疑活動（GFW 相遇／徘徊／AIS 中斷） */
+  loadActivity(): Promise<ActivityEvents>
 }
 
 type FieldKey = 'sst' | 'anom' | 'u' | 'v'
@@ -41,6 +43,10 @@ export class StaticSource implements DataSource {
       width, height, lon0, lat0, dlon, dlat, bounds, wrap, sst, anom, u, v,
       meta: { sst: pick('sst'), anom: pick('anom'), u: pick('u'), v: pick('v') },
     }
+  }
+
+  async loadActivity(): Promise<ActivityEvents> {
+    return (await fetchOk(dataUrl('events.json'))).json() as Promise<ActivityEvents>
   }
 
   async loadPorts(): Promise<PortStats> {

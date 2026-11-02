@@ -3,7 +3,7 @@ import { useStore, type LayerKey } from '../store'
 import s from './LayerPanel.module.css'
 
 const GROUPS: { title: string; items: { key: LayerKey; label: string }[] }[] = [
-  { title: '船隊', items: [{ key: 'fleet', label: '自家船隊' }, { key: 'track', label: '航跡（24 小時）' }, { key: 'gfw', label: '周邊漁船活動（GFW）' }, { key: 'ports', label: '港口與停靠（GFW）' }] },
+  { title: '船隊', items: [{ key: 'fleet', label: '自家船隊' }, { key: 'track', label: '航跡（24 小時）' }, { key: 'gfw', label: '周邊漁船活動（GFW）' }, { key: 'ports', label: '港口與停靠（GFW）' }, { key: 'activity', label: '可疑活動：相遇、徘徊（GFW）' }, { key: 'aisgap', label: 'AIS 刻意關閉（GFW）' }] },
   { title: '海況', items: [{ key: 'sst', label: '海表溫度' }, { key: 'anomaly', label: '海溫異常' }, { key: 'currents', label: '洋流' }] },
   { title: '漁場', items: [{ key: 'buoys', label: 'FAD 浮標' }, { key: 'hotspot', label: '海況熱區（示意）' }] },
 ]
