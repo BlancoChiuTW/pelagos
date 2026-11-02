@@ -1,4 +1,4 @@
-# PELAGOS 技術規格 v1
+# PELAGOS 技術規格 v1.1
 
 > 對應 PRD v2。PRD 講「做什麼」，這份講「怎麼做」。兩份衝突時以 PRD 的驗收標準為準，並在 HANDOFF「待 Blanco 決定」提出。
 > 最後更新：2026-11-02（Claude）
@@ -14,6 +14,9 @@
 | 底圖 | maplibre-gl 6.16 | |
 | 圖層 | deck.gl 9.4（core／layers／aggregation-layers／geo-layers／mapbox） | |
 | 狀態 | zustand 5 | |
+| 介面動畫 | motion 12 | 面板進出場、數字跳動、依序浮現（X06、X07） |
+| 編排動畫 | gsap 3 | 開機序列與導覽的時間軸（X01、F17）；GSAP 標準免費授權 |
+| 後製 | @luma.gl/effects 9.4 | deck.gl 後製濾鏡（暗角等，X10），版本須與 deck.gl 的 luma 一致 |
 | 測試 | vitest | 只測純函式（§11） |
 | 資料管線 | Python 3.12＋uv（numpy、pillow、requests） | |
 | 瀏覽器 | 桌機 Chrome／Edge 最新版，**需要 WebGL2** | 不支援時顯示說明頁，不白屏 |
@@ -34,7 +37,8 @@ src/
     layerStack.ts       依 store 組出 deck.gl layers 陣列（§6 圖層順序）
     camera.ts           預設視角、開場動畫、flyTo 輔助
   layers/               一個圖層一個檔案，各自 export `createXxxLayer(...)`
-    sst.ts  anomaly.ts  hotspot.ts  fleet.ts  others.ts  buoys.ts  tripTrack.ts
+    sst.ts  anomaly.ts  hotspot.ts  fleet.ts  others.ts  buoys.ts  buoyColumns.ts
+    tripTrack.ts  fleetTrails.ts  alertPulse.ts
     currents/           ParticleField.ts（純運算）＋ CurrentsCanvas.tsx（繪製）
   sim/
     rng.ts              固定種子亂數（mulberry32）
@@ -45,6 +49,12 @@ src/
   hud/                  一個面板一個元件＋同名 .module.css
     TopBar  KpiWall  LayerPanel  VesselCard  TripTimeline  AlertFeed
     Timeline  PerfHud  SourceBadge  Legend  TourCaption  OfflineBanner
+    BootSequence  RadarSweep  FxOverlay
+  fx/
+    director.ts         GSAP 主時間軸：開機序列、導覽（§18.4）
+    clock.ts            特效時鐘（30 fps，只驅動特效圖層）
+    quality.ts          特效等級與自動降級（§18.5）
+    glow.ts             光暈雙層繪製輔助
   tour/script.ts        自動導覽劇本
   styles/tokens.css  styles/global.css
   store.ts
@@ -229,6 +239,7 @@ interface AppState {
   online: boolean;
   intro: 'pending' | 'playing' | 'done';
   tour: { active: boolean; step: number };
+  fx: { quality: 'high' | 'low'; auto: boolean; buoyMode: 'points' | 'columns' };
   // actions：toggleLayer, setOthersCount, selectVessel, setCursor, play, pause, setSpeed, setOnline, ...
 }
 ```
@@ -278,7 +289,7 @@ interface AppState {
 - 動畫：數字變化 300 ms 補間；面板進場 200 ms 淡入位移；不做無意義的循環動畫（洋流除外）
 
 ## 15. 開場與導覽
-- 開場（F11）：載入完成後從 center `[150, 15]` zoom 1.3 `flyTo` 到預設視角，2.5 秒；圖層依序淡入：海溫 0.6s → 洋流 1.2s → 浮標 1.8s → 船隊 2.4s
+- 開場（F11）由 X01 開機序列實作，見 §18.4
 - 導覽（F17）：`tour/script.ts` 是步驟陣列 `{ camera, layers, select?, caption, ms }`，對應 PRD §10 腳本；任何使用者操作即中止導覽
 
 ## 16. 部署
@@ -293,3 +304,63 @@ interface AppState {
 | 換日線附近 deck 圖層斷裂 | 經度全用 0–360，不跨 ±180 切資料；T01 冒煙測試放一個 200°E 的點確認 |
 | 10 萬點在內顯上掉幀 | 預設 1 萬；zoom < 4 改 ScreenGrid 聚合 |
 | 粒子 canvas 與 deck 畫布順序 | 掛載後手動 `insertBefore` deck canvas；冒煙測試確認 |
+
+## 18. 特效（PRD §6 X01–X11）
+
+### 18.1 分層原則
+
+| 層 | 工具 | 負責 |
+|---|---|---|
+| 鏡頭 | MapLibre `flyTo`／`easeTo` | 俯衝、傾斜、環繞 |
+| 地圖特效 | deck.gl 原生：動畫屬性、`TripsLayer`、`HexagonLayer`、加法混色 | 光柱、拖尾、脈衝、光暈 |
+| 介面 | motion | 面板進出場、數字跳動、依序浮現 |
+| 導演 | gsap timeline | 開機序列與導覽：第幾秒做什麼，可暫停、可跳過 |
+| 後製 | @luma.gl/effects＋CSS 疊層 | 暗角、掃描線、雜訊 |
+
+規則：**特效不得改變資料圖層的內容**，只能疊加；特效「低」時全部可關，資訊照樣完整。
+
+### 18.2 特效時鐘（`fx/clock.ts`）
+- 單一 `requestAnimationFrame` 迴圈，節流到 30 fps，輸出 `fxTime`（秒）
+- **只有特效圖層**（fleetTrails、alertPulse、radar）吃 `fxTime`；資料圖層（浮標、周邊船）不得因 fxTime 重建
+- 分頁隱藏時停止
+
+### 18.3 各特效實作
+
+| ID | 實作 |
+|---|---|
+| X02 光柱 | `HexagonLayer`（GPU 聚合）：`extruded: true`、`radius: 40km`、`elevationScale` 依魚量加總、`getColorWeight` 用魚量；切到光柱模式時 `easeTo` pitch 50°，`elevationScale` 由 0 補間到目標值（`transitions`，800 ms）。material 開高 ambient 營造發光感 |
+| X03 拖尾 | `TripsLayer`：資料為自家船過去 24h Position（[lon,lat,t]），`currentTime` 綁時間軸 cursor，`trailLength` 6 小時，`fadeTrail: true`，寬 2px＋光暈層 |
+| X04 脈衝 | `ScatterplotLayer`，資料為有警示的船；`getRadius = base × (1 + (fxTime·0.8 + 相位) mod 1 × 3)`，`getLineColor` alpha 隨同一相位遞減；只描邊不填色；`updateTriggers: { getRadius: fxTime }` |
+| X05 光暈 | `fx/glow.ts` 把同一圖層畫兩次：底層寬 3×、alpha 0.25；上層原寬、alpha 1；底層 `parameters` 設加法混色（blend src-alpha, one） |
+| X06 面板 | motion `AnimatePresence`：詳情卡 x 24px→0＋淡入 200 ms；清單 `staggerChildren: 0.04` |
+| X07 數字 | motion `animate(from, to, { duration: 0.3 })` 寫入 ref，不觸發 React 重繪 |
+| X09 雷達 | DOM 元素，`map.project` 選中船位置，CSS `conic-gradient` ＋ `rotate` 動畫 3 秒一圈；地圖移動時跟著更新位置 |
+| X10 質感 | `FxOverlay`：CSS `repeating-linear-gradient` 掃描線（alpha 0.03）、`radial-gradient` 暗角、SVG feTurbulence 雜訊（alpha 0.02）；`pointer-events: none` |
+| X11 環繞 | `easeTo({ bearing: +1°/frame 等效, pitch: 55, duration: 長 })` 分段續接；任何 `mousedown`／`wheel` 中止 |
+
+### 18.4 導演（`fx/director.ts`）
+開機序列 X01（GSAP timeline，總長 ≤ 5 s）：
+
+| 時間 | 動作 |
+|---|---|
+| 0.0 | 黑底，`BootSequence` 逐字打出「PELAGOS」與「藍潮漁業 船隊戰情系統」 |
+| 0.6 | 逐行列出資料載入狀態（海溫 ✓、洋流 ✓、船隊 ✓；用 SVG 勾勾，不用 emoji），**綁真實的載入 Promise**，沒載完就停在這步 |
+| 1.8 | 黑幕淡出；地圖從 center `[150, 15]` zoom 1.3 `flyTo` 預設視角（2.5 s） |
+| 2.2 / 2.8 / 3.4 / 4.0 | 依序淡入：海溫 → 洋流 → 浮標 → 船隊＋拖尾 |
+| 4.4 | HUD 面板 stagger 進場，KPI 數字從 0 跳到實際值 |
+
+- 任意鍵或點擊 → `timeline.progress(1)` 直接跳到結尾狀態
+- 導覽（F17）也用同一個 director，劇本在 `tour/script.ts`
+
+### 18.5 特效等級與自動降級（`fx/quality.ts`）
+| 等級 | 內容 |
+|---|---|
+| high | 全部特效；洋流 8,000 顆上限 |
+| low | 關 X05 光暈、X10 質感、X09 雷達；洋流上限 3,000；拖尾只留選中船 |
+
+- 效能 HUD 的 FPS 移動平均 < 40 **持續 3 秒** → 自動降到 low，並顯示一次提示「已自動降低特效以維持流暢」
+- 使用者手動切換後 `auto = false`，不再自動調整
+
+### 18.6 不做
+- MapLibre 地球儀投影（與 deck.gl 相容性未驗證）
+- three.js（與 deck.gl 搶同一個 WebGL 畫布，除錯成本高）

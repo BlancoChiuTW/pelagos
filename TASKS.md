@@ -6,7 +6,7 @@
 
 ## M0 基礎（P0 前置）
 - [ ] T00 ETL 改版（TECH_SPEC §3）：範圍 100°E→210°E、20°S→45°N，跨換日線分兩段抓再 +360 接上；加抓 anom；輸出改二進位 `ocean.json`＋`*.i16`＋`sst.png`／`anom.png`；刪舊的 sst.json／currents.json；`scripts/verify.sh` 的資料檔清單同步改
-- [ ] T01 專案骨架（TECH_SPEC §1、§2、§5、§9）：裝 zustand、vitest、@fontsource/jetbrains-mono；建 types／DataSource／grid／store／tokens／MapView；**先做冒煙測試**（MapboxOverlay＋maplibre 6 能畫點、200°E 的點不斷裂、洋流 canvas 插在中間）；verify 加 `vitest run`；刪 Vite 範例
+- [ ] T01 專案骨架（TECH_SPEC §1、§2、§5、§9）：裝 zustand、vitest、@fontsource/jetbrains-mono、motion、gsap、@luma.gl/effects；建 types／DataSource／grid／store／tokens／MapView；**先做冒煙測試**（MapboxOverlay＋maplibre 6 能畫點、200°E 的點不斷裂、洋流 canvas 插在中間）；verify 加 `vitest run`；刪 Vite 範例
 - [ ] T02 GitHub Pages 部署：`vite.config.ts` 設 base；`.github/workflows/deploy.yml`。**建立公開 repo 與 push 要等 Blanco 同意**
 
 ## M1 P0（目標 11/02 22:00）
@@ -21,7 +21,13 @@
 - [ ] F08 KPI 牆
 - [ ] F09 效能 HUD＋數量切換（標「壓力測試」）
 - [ ] F10 資料來源與時間標示
-- [ ] F11 開場動畫
+- [ ] X01 開機序列（含 F11 開場；TECH_SPEC §18.4）
+- [ ] X02 3D 魚量光柱
+- [ ] X03 船隻發光拖尾
+- [ ] X04 警示脈衝環
+- [ ] X05 霓虹光暈
+- [ ] X06 面板轉場＋X07 數字跳動
+- [ ] X08 特效等級與自動降級
 
 ## M2 P1（目標 11/03 03:00）
 - [ ] F12 時間軸回放
@@ -31,6 +37,9 @@
 - [ ] F16 離線與降級
 - [ ] F17 自動導覽
 - [ ] F18 README 技術決策（含資料模型圖、正式架構圖）
+- [ ] X09 雷達掃描
+- [ ] X10 畫面質感
+- [ ] X11 鏡頭環繞
 
 ## M3 P2（有時間才做）
 - [ ] F19 EEZ 界線
