@@ -1,0 +1,14 @@
+.card { display: flex; flex-direction: column; gap: 10px; max-height: 100%; overflow: hidden; }
+.head { display: flex; align-items: flex-start; gap: 10px; }
+.name { font-size: 22px; font-weight: 600; letter-spacing: 0.04em; line-height: 1.1; }
+.meta { margin-top: 4px; font-size: 11px; color: var(--text-dim); font-family: var(--font-num); }
+.chip { margin-left: auto; padding: 2px 8px; border: 1px solid currentColor; font-size: 11px; white-space: nowrap; }
+.close { border: 0; background: none; color: var(--text-dim); cursor: pointer; padding: 2px; line-height: 0; }
+.close:hover { color: var(--text); }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+.k { font-size: 10px; color: var(--text-dim); letter-spacing: 0.04em; }
+.v { font-family: var(--font-num); font-size: 14px; }
+.v small { font-size: 10px; color: var(--text-dim); margin-left: 2px; }
+.sep { height: 1px; background: var(--line); }
+.fuel { height: 4px; background: rgba(127, 143, 156, 0.25); margin-top: 4px; }
+.fuel > div { height: 100%; }

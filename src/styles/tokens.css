@@ -1,7 +1,7 @@
 /* 設計 token（PRD §8）。元件一律引用變數，不寫死色碼 */
 :root {
   --bg: #05080d;
-  --panel: rgba(8, 14, 22, 0.72);
+  --panel: rgba(7, 12, 19, 0.86);
   --line: rgba(120, 200, 230, 0.18);
   --text: #d7e2ea;
   --text-dim: #7f8f9c;

@@ -25,7 +25,7 @@ for (const [env, act] of [['MOUSE', 'move'], ['CLICK', 'click']]) {
   const [x, y] = process.env[env].split(',').map(Number)
   await page.mouse.move(x, y)
   if (act === 'click') await page.mouse.click(x, y)
-  await page.waitForTimeout(800)
+  await page.waitForTimeout(Number(process.env.AFTER ?? 1800))
 }
 await page.screenshot({ path: out })
 const info = await page.evaluate(() =>

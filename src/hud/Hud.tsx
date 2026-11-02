@@ -25,7 +25,7 @@ export function Hud({ left, right, card, bottom, bottomLeft, bottomRight }: Slot
       <div className={s.top}><TopBar /></div>
       <div className={s.left}>{left ?? ph('圖層', 'LAYERS')}</div>
       <div className={s.right}>{right ?? <>{ph('船隊總覽', 'FLEET')}{ph('事件警示', 'ALERTS')}</>}</div>
-      {card && <div className={s.card}>{card}</div>}
+      <div className={s.card}>{card}</div>
       <div className={s.bottom}>{bottom ?? ph('時間軸', 'TIMELINE')}</div>
       <div className={s.bottomLeft}>{bottomLeft}</div>
       <div className={s.bottomRight}>{bottomRight}</div>

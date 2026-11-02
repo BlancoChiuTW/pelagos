@@ -16,6 +16,9 @@ import { useMapZoom } from './map/useMapZoom'
 import { useTicker } from './useTicker'
 import { buoyFrame } from './layers/buoys'
 import { HOUR } from './sim/geo'
+import { AnimatePresence } from 'motion/react'
+import { VesselCard } from './hud/VesselCard'
+import type { TripEvent } from './data/types'
 
 export default function App() {
   const [h, setHandles] = useState<MapHandles | null>(null)
@@ -45,11 +48,22 @@ export default function App() {
   const snap = useFleetSnapshot(grid, now)
   const fleet = useFleetItems(snap, t)
   const others = useOthers(grid, othersCount, t, layerFlags.others)
+  const selected = fleet.find((f) => f.vessel.id === selectedId) ?? null
+  const selectedEvents = useMemo(() => (snap && selectedId ? snap.events.filter((e) => e.vesselId === selectedId) : []), [snap, selectedId])
+  // 選船 → 鏡頭移過去（卡片在右側，中心往左偏）
+  useEffect(() => {
+    if (!h || !selectedId) return
+    const item = fleet.find((f) => f.vessel.id === selectedId)
+    if (item) h.map.easeTo({ center: [item.pose.lon, item.pose.lat], zoom: Math.max(h.map.getZoom(), 5.2), offset: [-180, 0], duration: 1200 })
+    // 只在選擇改變時移動
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [h, selectedId])
+  const flyToEvent = (e: TripEvent) => h?.map.flyTo({ center: [e.lon, e.lat], zoom: Math.max(h.map.getZoom(), 6), offset: [-180, 0], duration: 1400 })
   const buoys = useMemo(() => (snap ? buoyFrame(snap.buoys, now - 24 * HOUR, t) : null), [snap, now, t])
 
   const layers = useMemo<Layer[]>(
-    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, onSelect: selectVessel }),
-    [layerFlags, zoom, fleet, others, buoys, selectedId, selectVessel],
+    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel }),
+    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel],
   )
   return (
     <>
@@ -57,6 +71,7 @@ export default function App() {
       {h && grid && <CurrentsCanvas map={h.map} canvas={h.fxCanvas} grid={grid} enabled={showCurrents} maxParticles={fxLow ? 3000 : 8000} />}
       <Hud
         left={<LayerPanel />}
+        card={<AnimatePresence>{selected && grid && <VesselCard key={selected.vessel.id} item={selected} events={selectedEvents} grid={grid} onEvent={flyToEvent} />}</AnimatePresence>}
         bottomLeft={
           <>
             {h && grid && <Readout map={h.map} ocean={grid} />}

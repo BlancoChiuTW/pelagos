@@ -4,6 +4,7 @@
 .left { position: absolute; top: 68px; left: 12px; width: 220px; display: flex; flex-direction: column; gap: var(--gap); }
 .right { position: absolute; top: 68px; right: 12px; bottom: 96px; width: 320px; display: flex; flex-direction: column; gap: var(--gap); }
 .card { position: absolute; top: 68px; right: 344px; width: 340px; bottom: 96px; display: flex; flex-direction: column; }
+.card:empty { display: none; }
 .bottom { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); width: min(640px, calc(100vw - 600px)); }
 .bottomLeft { position: absolute; left: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
 .bottomRight { position: absolute; right: 12px; bottom: 36px; }
