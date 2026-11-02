@@ -20,13 +20,13 @@ export const EVENT_VAR: Record<EventType, string> = {
   signal_lost: 'var(--alert)',
 }
 export const EVENT_RGB: Record<EventType, [number, number, number]> = {
-  depart: [57, 213, 255],
-  set: [62, 224, 143],
-  deploy_buoy: [127, 143, 156],
-  transship: [255, 181, 71],
-  port_call: [215, 226, 234],
-  bunker: [127, 143, 156],
-  signal_lost: [255, 77, 94],
+  depart: [100, 210, 255],
+  set: [48, 209, 88],
+  deploy_buoy: [142, 142, 147],
+  transship: [255, 159, 10],
+  port_call: [235, 235, 245],
+  bunker: [142, 142, 147],
+  signal_lost: [255, 69, 58],
 }
 export const VESSEL_TYPE_LABEL: Record<VesselType, string> = { purse_seiner: '圍網船', reefer: '冷凍運搬船' }
 

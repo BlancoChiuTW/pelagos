@@ -31,7 +31,7 @@ export function mountOceanRasters(map: maplibregl.Map, grid: GridMeta) {
         id,
         type: 'raster',
         source: id,
-        paint: { 'raster-opacity': 0, 'raster-resampling': 'linear', 'raster-fade-duration': 0, 'raster-opacity-transition': { duration: 600 } },
+        paint: { 'raster-opacity': 0, 'raster-saturation': -0.45, 'raster-resampling': 'linear', 'raster-fade-duration': 0, 'raster-opacity-transition': { duration: 600 } },
       },
       before,
     )
@@ -48,7 +48,7 @@ export function mountOceanRasters(map: maplibregl.Map, grid: GridMeta) {
 }
 
 /** 開關用透明度補間，不用 visibility（才有淡入淡出） */
-export function setRasterVisible(map: maplibregl.Map, key: RasterKey, on: boolean, opacity = 0.6) {
+export function setRasterVisible(map: maplibregl.Map, key: RasterKey, on: boolean, opacity = 0.38) {
   const id = `pelagos-${key}`
   if (map.getLayer(id)) map.setPaintProperty(id, 'raster-opacity', on ? opacity : 0)
 }

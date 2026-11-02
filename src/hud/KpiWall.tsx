@@ -21,7 +21,7 @@ export function KpiWall({ fleet, snap, alerts, now }: { fleet: FleetItem[]; snap
   const buoys = snap.buoys.length
 
   return (
-    <Panel title="船隊總覽" en="FLEET OVERVIEW">
+    <Panel title="船隊總覽">
       <div className={s.grid}>
         <div><div className={s.k}>在海船數</div><div className={s.v}><AnimatedNumber value={atSea} /><small>/ {fleet.length}</small></div></div>
         <div><div className={s.k}>本月漁獲</div><div className={s.v}><AnimatedNumber value={monthTons} /><small>噸</small></div></div>

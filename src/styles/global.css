@@ -1,11 +1,17 @@
-@import "@fontsource/jetbrains-mono/400.css";
-@import "@fontsource/jetbrains-mono/600.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/noto-sans-tc/400.css";
+@import "@fontsource/noto-sans-tc/600.css";
 @import "./tokens.css";
 @import "maplibre-gl/dist/maplibre-gl.css";
 
 *, *::before, *::after { box-sizing: border-box; }
-html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
-body { overflow: hidden; -webkit-font-smoothing: antialiased; }
-.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
-.maplibregl-ctrl-attrib { background: rgba(5, 8, 13, 0.6) !important; color: var(--text-dim); font-size: 10px; }
-.maplibregl-ctrl-attrib a { color: var(--text-dim) !important; }
+html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(--label); font: var(--t-subhead); }
+body { overflow: hidden; -webkit-font-smoothing: antialiased; letter-spacing: -0.01em; }
+button { font: inherit; color: inherit; }
+.num { font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.maplibregl-ctrl-attrib { background: rgba(0, 0, 0, 0.4) !important; color: var(--label-3); font-size: 10px; }
+.maplibregl-ctrl-attrib a { color: var(--label-3) !important; }
+/* deck.gl 滑過資訊卡（getTooltip） */
+.deck-tooltip { background: var(--material-thick) !important; color: var(--label) !important; border-radius: 10px; padding: 8px 10px !important; font: var(--t-footnote) !important; box-shadow: 0 8px 24px rgba(0,0,0,.5); border: 0.5px solid rgba(255,255,255,.12); backdrop-filter: blur(20px); }

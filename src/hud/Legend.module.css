@@ -1,3 +1,0 @@
-.legend { width: 260px; }
-.bar { height: 8px; border-radius: 1px; }
-.ticks { display: flex; justify-content: space-between; margin-top: 4px; font-family: var(--font-num); font-size: 10px; color: var(--text-dim); }

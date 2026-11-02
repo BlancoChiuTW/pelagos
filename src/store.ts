@@ -6,11 +6,17 @@ export type LayerKey = 'sst' | 'anomaly' | 'currents' | 'buoys' | 'others' | 'fl
 export type OthersCount = 10000 | 50000 | 100000
 export type Speed = 1 | 10 | 60
 export type FxQuality = 'high' | 'low'
+export type View = 'map' | 'vessels' | 'trips' | 'buoys' | 'alerts' | 'data'
 
 const HOUR = 3_600_000
 const loadNow = Math.floor(Date.now() / HOUR) * HOUR // SIM_NOW：取整到小時（TECH_SPEC §8.1）
 
 export interface AppState {
+  view: View
+  /** 展示模式：顯示效能 HUD 與壓力測試開關 */
+  demoMode: boolean
+  setView: (v: View) => void
+  setDemoMode: (on: boolean) => void
   layers: Record<LayerKey, boolean>
   othersCount: OthersCount
   selectedVesselId: string | null
@@ -38,7 +44,12 @@ export interface AppState {
 }
 
 export const useStore = create<AppState>()((set) => ({
-  layers: { sst: true, anomaly: false, currents: true, buoys: true, others: true, fleet: true, hotspot: false, track: true },
+  // v3 減法：預設只開船隊＋航跡，海溫淡化當背景（PRD §15.3）
+  layers: { sst: true, anomaly: false, currents: false, buoys: false, others: false, fleet: true, hotspot: false, track: true },
+  view: 'map',
+  demoMode: false,
+  setView: (view) => set({ view }),
+  setDemoMode: (demoMode) => set({ demoMode }),
   othersCount: 10000,
   selectedVesselId: null,
   time: { now: loadNow, cursor: loadNow, playing: false, speed: 10 },

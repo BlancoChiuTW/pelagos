@@ -1,8 +1,8 @@
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 8px; }
-.k { font-size: 10px; color: var(--text-dim); letter-spacing: 0.04em; }
-.v { font-family: var(--font-num); font-size: 22px; line-height: 1.15; }
-.v small { font-size: 10px; color: var(--text-dim); margin-left: 3px; }
-.bar { display: flex; height: 5px; margin: 10px 0 4px; gap: 2px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 10px; }
+.k { font: var(--t-caption); color: var(--label-2); }
+.v { font: var(--t-title2); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.v small { font: var(--t-caption); color: var(--label-2); margin-left: 3px; }
+.bar { display: flex; height: 6px; margin: 16px 0 8px; gap: 2px; border-radius: 3px; overflow: hidden; }
 .bar > div { height: 100%; transition: flex-grow 0.6s; }
-.legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 10px; color: var(--text-dim); }
-.legend i { display: inline-block; width: 7px; height: 7px; margin-right: 4px; vertical-align: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font: var(--t-caption); color: var(--label-2); }
+.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }

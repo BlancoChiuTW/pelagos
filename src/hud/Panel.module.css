@@ -1,34 +1,14 @@
-/* 面板：半透明＋模糊、1px 細框、四角角標（PRD §8、TECH_SPEC §14） */
+/* Apple 霧面玻璃面板（TECH_SPEC §19.3） */
 .panel {
   position: relative;
-  background: var(--panel);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 10px 12px;
+  background: var(--material);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 0.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-l);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  padding: 14px 16px;
   pointer-events: auto;
-  --c: var(--accent);
-  background-image:
-    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
-    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
-    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c)),
-    linear-gradient(var(--c), var(--c)), linear-gradient(var(--c), var(--c));
-  background-repeat: no-repeat;
-  background-size: 8px 1px, 1px 8px, 8px 1px, 1px 8px, 8px 1px, 1px 8px, 8px 1px, 1px 8px;
-  background-position:
-    left -1px top -1px, left -1px top -1px, right -1px top -1px, right -1px top -1px,
-    left -1px bottom -1px, left -1px bottom -1px, right -1px bottom -1px, right -1px bottom -1px;
 }
-.title {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 0 0 8px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--text-dim);
-}
-.title em { font-style: normal; font-family: var(--font-num); font-size: 10px; opacity: 0.7; }
+.title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 10px; font: var(--t-headline); color: var(--label); }
+.title em { font-style: normal; font: var(--t-caption2); color: var(--label-3); letter-spacing: 0.04em; }

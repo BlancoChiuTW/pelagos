@@ -2,7 +2,7 @@
 import { useEffect, useRef } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import { MapboxOverlay } from '@deck.gl/mapbox'
-import type { Layer } from '@deck.gl/core'
+import type { Layer, PickingInfo } from '@deck.gl/core'
 import { BASEMAP_STYLE, INTRO_START } from './camera'
 // MapLibre 6 用 import.meta.url 找 worker，打包後找不到 → 用 Vite ?url 把 worker 檔當資產輸出再指定
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
@@ -16,12 +16,15 @@ export interface MapHandles {
   fxCanvas: HTMLCanvasElement
 }
 
+type Tooltip = (info: PickingInfo) => { html: string } | null
+
 interface Props {
   layers: Layer[]
+  getTooltip?: Tooltip
   onReady?: (h: MapHandles) => void
 }
 
-export function MapView({ layers, onReady }: Props) {
+export function MapView({ layers, getTooltip, onReady }: Props) {
   const el = useRef<HTMLDivElement>(null)
   const overlayRef = useRef<MapboxOverlay | null>(null)
 
@@ -61,8 +64,8 @@ export function MapView({ layers, onReady }: Props) {
   }, [])
 
   useEffect(() => {
-    overlayRef.current?.setProps({ layers })
-  }, [layers])
+    overlayRef.current?.setProps({ layers, getTooltip })
+  }, [layers, getTooltip])
 
   return <div ref={el} style={{ position: 'absolute', inset: 0 }} />
 }

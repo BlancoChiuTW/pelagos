@@ -3,11 +3,11 @@ import type { Layer } from '@deck.gl/core'
 import type { FleetItem } from '../data/useFleet'
 import type { OthersFrame } from '../sim/useOthers'
 import type { AppState } from '../store'
-import { createFleetLayer } from '../layers/fleet'
+import { createFleetLayers } from '../layers/fleet'
 import { createOthersLayer } from '../layers/others'
 import { createBuoyLayer, type BuoyFrame } from '../layers/buoys'
 import { createTripTrackLayers } from '../layers/tripTrack'
-import type { TripEvent } from '../data/types'
+import type { Epoch, TripEvent } from '../data/types'
 
 export interface StackInput {
   layers: AppState['layers']
@@ -19,6 +19,8 @@ export interface StackInput {
   /** 選中船的航次事件 */
   selectedEvents: TripEvent[]
   onSelect: (id: string) => void
+  trackStart: Epoch
+  t: Epoch
 }
 
 export function buildLayers(i: StackInput): Layer[] {
@@ -26,7 +28,8 @@ export function buildLayers(i: StackInput): Layer[] {
   if (i.layers.others && i.others) out.push(createOthersLayer(i.others, i.zoom))
   if (i.layers.buoys && i.buoys) out.push(createBuoyLayer(i.buoys, i.zoom))
   const sel = i.fleet.find((f) => f.vessel.id === i.selectedId)
-  if (i.layers.track && sel) out.push(...createTripTrackLayers(sel.track, i.selectedEvents))
-  if (i.layers.fleet && i.fleet.length) out.push(createFleetLayer(i.fleet, i.selectedId, i.onSelect))
+  if (sel) out.push(...createTripTrackLayers(sel.track, i.selectedEvents))
+  if (i.layers.fleet && i.fleet.length)
+    out.push(...createFleetLayers({ items: i.fleet, selectedId: i.selectedId, zoom: i.zoom, showTrails: i.layers.track, trackStart: i.trackStart, t: i.t, onSelect: i.onSelect }))
   return out
 }

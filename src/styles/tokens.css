@@ -1,16 +1,41 @@
-/* 設計 token（PRD §8）。元件一律引用變數，不寫死色碼 */
+/* 設計 token（PRD §15.3、TECH_SPEC §19.3）：Apple 深色系統色＋iOS 字級。
+   舊名（--text、--accent…）保留為別名，元件不用逐一改。 */
 :root {
-  --bg: #05080d;
-  --panel: rgba(7, 12, 19, 0.86);
-  --line: rgba(120, 200, 230, 0.18);
-  --text: #d7e2ea;
-  --text-dim: #7f8f9c;
-  --accent: #39d5ff;
-  --warn: #ffb547;
-  --alert: #ff4d5e;
-  --ok: #3ee08f;
-  --font-ui: "Inter", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
-  --font-num: "JetBrains Mono", ui-monospace, monospace;
-  --radius: 2px;
-  --gap: 12px;
+  --label: #ffffff;
+  --label-2: rgba(235, 235, 245, 0.6);
+  --label-3: rgba(235, 235, 245, 0.3);
+  --sep: rgba(84, 84, 88, 0.55);
+  --fill: rgba(120, 120, 128, 0.24);
+  --tint: #64d2ff;
+  --green: #30d158;
+  --orange: #ff9f0a;
+  --red: #ff453a;
+  --gray: #8e8e93;
+  --material: rgba(28, 28, 30, 0.86);
+  --material-thick: rgba(28, 28, 30, 0.9);
+  --radius-l: 14px;
+  --radius-s: 8px;
+
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC", "Inter", "Noto Sans TC", sans-serif;
+  --t-title1: 600 28px/34px var(--font-ui);
+  --t-title2: 700 22px/28px var(--font-ui);
+  --t-headline: 600 17px/22px var(--font-ui);
+  --t-subhead: 400 15px/20px var(--font-ui);
+  --t-footnote: 400 13px/18px var(--font-ui);
+  --t-caption: 400 12px/16px var(--font-ui);
+  --t-caption2: 400 11px/13px var(--font-ui);
+
+  /* 舊名別名 */
+  --bg: #000000;
+  --panel: var(--material);
+  --line: var(--sep);
+  --text: var(--label);
+  --text-dim: var(--label-2);
+  --accent: var(--tint);
+  --ok: var(--green);
+  --warn: var(--orange);
+  --alert: var(--red);
+  --font-num: var(--font-ui);
+  --radius: var(--radius-s);
+  --gap: 10px;
 }

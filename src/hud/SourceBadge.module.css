@@ -1,5 +1,0 @@
-.list { display: flex; flex-direction: column; gap: 3px; font-size: 10px; color: var(--text-dim); }
-.row { display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; }
-.row b { font-weight: 400; color: var(--text); }
-.sim { color: var(--warn); }
-.err { color: var(--alert); }

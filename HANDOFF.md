@@ -26,7 +26,9 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 - 注意：無頭瀏覽器 FPS 只有個位數（SwiftShader 軟體繪圖），不代表真機效能
 - X01 完成：`hud/BootSequence.tsx`（逐字打字、載入狀態綁真實 Promise 逐行打勾、按任意鍵略過）＋`fx/director.ts`（GSAP：黑幕淡出、flyTo 俯衝、`store.introStage` 0→5 依序點亮海溫／洋流／浮標／船隊／HUD）。地圖初始視角改成 INTRO_START。海岸線 minzoom 2.4（高空會看到裁切框）
 - **M1 剩下**：X02 光柱、X03 拖尾、X04 脈衝、X05 光暈、X06 面板轉場（詳情卡滑入與時間軸 stagger 已做，剩警示流）、X08 特效等級，以及 T02 部署（等 Blanco）
-- 下一步：X03 拖尾＋X04 脈衝＋X05 光暈（都在 `layers/`，接 `fx/clock.ts` 特效時鐘，見 TECH_SPEC §18.2–18.3）
+- **v3 改版（PRD §15、TECH_SPEC §19）**：Blanco 要「一套有管理功能的系統」＋Apple 介面＋戰略遊戲地圖＋視覺減法
+- V01–V03 完成：Apple token（`styles/tokens.css`，舊變數名保留為別名）、Inter＋Noto Sans TC 打包；左側導覽列（`hud/Sidebar`）、上方工具列（搜尋／圖層 iOS 開關／資訊）、右側情境面板（沒選船＝KPI 總覽、選船＝詳情卡）；`store.view` 切頁，管理頁暫為 `pages/Placeholder`。地圖：俯視剪影＋狀態環＋名牌（zoom ≥ 4.5）＋全船隊 24h TripsLayer 航跡＋滑過小卡。預設圖層只開船隊＋航跡＋淡化海溫（飽和度 −0.45、透明 0.38）。已刪 TopBar／Readout／Legend／SourceBadge（併入資訊選單）
+- 下一步：M01 船舶管理（`pages/Vessels.tsx`；編輯存 IndexedDB `idb-keyval`，見 TECH_SPEC §19.2）
 
 ## 接力規則（兩邊都必須遵守）
 
