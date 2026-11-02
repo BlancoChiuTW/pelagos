@@ -13,8 +13,8 @@
 - [x] F01 (2151478) HUD 版面與換日線連續
 - [x] F02 (1e319c9) 海溫圖層＋滑鼠讀值＋圖例
 - [x] F03 (57cc82d) 洋流粒子動畫
-- [~] Claude 19:10 S01 模擬資料：`src/sim/seed.ts` 照 PRD §4 產生 Vessel／Trip／Event／Position／Buoy（固定種子、只在海上）
-- [ ] F04 船隊圖層（自家 36 艘＋周邊 Worker 模擬）
+- [x] S01 (eba3a6b) 模擬資料：`src/sim/seed.ts` 照 PRD §4 產生 Vessel／Trip／Event／Position／Buoy（固定種子、只在海上）
+- [~] Claude 19:35 F04 船隊圖層（自家 36 艘＋周邊 Worker 模擬）
 - [ ] F05 FAD 浮標圖層
 - [ ] F06 船隻詳情卡
 - [ ] F07 航次時間軸（病程）＋本航次軌跡
