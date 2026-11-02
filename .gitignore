@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 etl/raw/
+
+# 機密：API token 只放本機 .env，絕不進版控（範本見 .env.example）
+.env
+.env.*
+!.env.example

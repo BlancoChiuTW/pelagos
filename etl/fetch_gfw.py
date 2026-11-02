@@ -16,8 +16,8 @@ API（依 GFW 官方 Python SDK gfw-api-python-client 原始碼確認的參數�
   回應 {"entries":[{"public-global-fishing-effort:v3.0":[{"lat","lon","hours","geartype","vesselIDs",...}]}]}
   GFW 資料約延遲 4–5 天，所以取「今天往前 35 天到往前 5 天」這 30 天。
 
-用法：uv run etl/fetch_gfw.py          （mock）
-      GFW_TOKEN=xxx uv run etl/fetch_gfw.py  （live；token 不要寫進任何檔案）
+用法：uv run etl/fetch_gfw.py
+      有 .env（GFW_TOKEN=…，見 .env.example，不進版控）或環境變數 GFW_TOKEN → live；都沒有 → mock
 """
 import datetime as dt
 import json
@@ -116,6 +116,17 @@ def normalize(resp: dict, mode: str) -> dict:
     }
 
 
+def load_dotenv(path: Path) -> None:
+    """讀專案根目錄 .env（不進版控）；已存在的環境變數優先（CI 用 GitHub Secrets 注入）"""
+    if not path.exists():
+        return
+    for line in path.read_text().splitlines():
+        k, sep, v = line.partition("=")
+        if sep and not line.lstrip().startswith("#") and k.strip() not in os.environ:
+            os.environ[k.strip()] = v.strip()
+
+
+load_dotenv(ROOT / ".env")
 token = os.environ.get("GFW_TOKEN", "").strip()
 RAW.parent.mkdir(exist_ok=True)
 if token:
