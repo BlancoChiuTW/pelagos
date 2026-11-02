@@ -6,5 +6,6 @@ for f in public/data/ocean.json public/data/sst.i16 public/data/anom.i16 public/
   [ -s "$f" ] || { echo "缺資料檔：$f（跑 uv run etl/fetch_ocean.py）"; exit 1; }
 done
 npx tsc -b
+npx vitest run --reporter=dot
 npx vite build --logLevel warn
 echo "verify OK"

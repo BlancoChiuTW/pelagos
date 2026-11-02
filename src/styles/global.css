@@ -1,0 +1,11 @@
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "./tokens.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
+body { overflow: hidden; -webkit-font-smoothing: antialiased; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.maplibregl-ctrl-attrib { background: rgba(5, 8, 13, 0.6) !important; color: var(--text-dim); font-size: 10px; }
+.maplibregl-ctrl-attrib a { color: var(--text-dim) !important; }

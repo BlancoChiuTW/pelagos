@@ -11,10 +11,10 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 
 ## 現況
 
-- 已有：Vite + React 19 + TS 骨架（仍是範例頁）、maplibre-gl 與 deck.gl 9 套件已裝
+- T01 完成：骨架（types／grid／DataSource／store／tokens／MapView）；冒煙測試已用無頭瀏覽器截圖確認——deck.gl 9.4＋MapLibre 6 可畫、120°E／180°／200°E 的點與海溫跨換日線連續、洋流 canvas 夾在 MapLibre 與 deck 畫布之間
 - T00 完成：`public/data/` 已是 TECH_SPEC §3.3 的二進位格式，範圍 100°E–210°E（跨換日線無接縫，已目視 sst.png）。海溫／異常 2026-10-17，洋流 2026-09-28；網格 220×130、陸地 14%
 - PRD v2：核心資料模型是「船 → 航次 → 事件」（PRD §4），模擬資料照它產生
-- 下一步：TASKS.md 的 T01（先做冒煙測試）
+- 下一步：TASKS.md 的 T02（部署設定；建 repo／push 等 Blanco），接著 F01
 
 ## 接力規則（兩邊都必須遵守）
 
@@ -37,7 +37,14 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 npm run verify     # tsc 型別檢查 + vite build + 資料檔存在檢查
 npm run dev        # 本機看畫面（http://localhost:5173）
 ```
-只有型別與建置會被自動檢查。**畫面效果沒人自動看**：做完視覺類任務，在「現況」註明「畫面未目視確認」，讓 Blanco 或下一位確認。
+**截圖自我驗證**（不用麻煩 Blanco 當 QA）：
+```
+npm run build && (setsid npx vite preview --port 4173 >/tmp/pelagos-preview.log 2>&1 &)
+node scripts/shot.mjs http://localhost:4173/pelagos/ /tmp/shot.png 9000   # 印出 canvas 疊放與 console 錯誤
+```
+用 Playwright 快取的 chromium（SwiftShader 軟體 WebGL），截圖後自己看圖。Codex 若沙盒不能開瀏覽器，就註明「畫面未目視確認」。
+
+只有型別、單元測試與建置會被自動檢查。**畫面效果沒人自動看**：做完視覺類任務，在「現況」註明「畫面未目視確認」，讓 Blanco 或下一位確認。
 
 ## 目錄約定
 
@@ -59,6 +66,9 @@ docs/PRD.md     規格
 以 `docs/TECH_SPEC.md` §3.3 為準：`ocean.json`（中繼資料）＋`sst/anom/u/v.i16`（Int16 LE，×scale 還原，−32768＝陸地）＋`sst.png`／`anom.png`（北在上、陸地透明）。
 
 ## 陷阱
+
+- **MapLibre 6 的 worker**：它用 `import.meta.url` 找 worker，Vite 打包後會 404、地圖不出來。`MapView.tsx` 已用 `?url` 匯入並 `setWorkerUrl`，不要拿掉。
+- **海溫海岸線鋸齒**：海溫是 0.5° 網格，現在用 deck BitmapLayer 蓋在底圖上，陸地邊緣呈方塊狀。F02 建議改用 MapLibre 原生 `image` source＋raster layer，`beforeId` 放在底圖陸地圖層之前，讓陸地蓋住鋸齒。
 
 - **換日線**：作業海域跨東經 180°。內部經度一律用 0–360（例如西經 150° = 210）；MapLibre 能吃超過 180 的經度，deck.gl 圖層也一樣。不要在 −180/180 處切資料。
 - **赤道地轉流**：地轉流在赤道附近不成立，ETL 已把 |緯度| < 3° 設為 0，粒子在那裡會停住，這是正常的。

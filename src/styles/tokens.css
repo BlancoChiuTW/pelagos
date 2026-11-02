@@ -1,0 +1,16 @@
+/* 設計 token（PRD §8）。元件一律引用變數，不寫死色碼 */
+:root {
+  --bg: #05080d;
+  --panel: rgba(8, 14, 22, 0.72);
+  --line: rgba(120, 200, 230, 0.18);
+  --text: #d7e2ea;
+  --text-dim: #7f8f9c;
+  --accent: #39d5ff;
+  --warn: #ffb547;
+  --alert: #ff4d5e;
+  --ok: #3ee08f;
+  --font-ui: "Inter", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-num: "JetBrains Mono", ui-monospace, monospace;
+  --radius: 2px;
+  --gap: 12px;
+}
