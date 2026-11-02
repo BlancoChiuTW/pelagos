@@ -1,7 +1,7 @@
 // 可疑活動（GFW 事件）：徽章圖示（和港口同一套語言：深色底盤＋外圈＋符號）
 //   橘：疑似海上轉載（兩船並排＋雙向箭頭）  藍：海上加油（油滴）
 //   琥珀：運搬船徘徊（繞圈箭頭）            紅：AIS 刻意關閉（訊號＋斜線）
-import { IconLayer, ScatterplotLayer } from '@deck.gl/layers'
+import { IconLayer, ScatterplotLayer, TextLayer } from '@deck.gl/layers'
 import type { ActivityEvent } from '../data/types'
 
 const badge = (glyph: string) => ({
@@ -25,6 +25,9 @@ const COLOR: Record<Key, RGBA> = {
 }
 const SIZE: Record<Key, number> = { transshipment: 20, bunkering: 17, loitering: 14, gap: 14 }
 
+/** 徽章旁的文字標籤（不用查圖例就看懂） */
+const TAG: Record<Key, string> = { transshipment: '轉載', bunkering: '加油', loitering: '徘徊', gap: 'AIS 斷訊' }
+
 export const ACTIVITY_LABEL = { encounter: '海上相遇', loitering: '運搬船徘徊', gap: 'AIS 刻意關閉' } as const
 
 export function createActivityLayer(events: ActivityEvent[], showGaps: boolean, zoom: number) {
@@ -42,6 +45,25 @@ export function createActivityLayer(events: ActivityEvent[], showGaps: boolean, 
     new ScatterplotLayer<ActivityEvent>({
       id: 'gfw-activity-backing', data: badges, getPosition: (e) => [e.lon, e.lat], getRadius: (e) => (SIZE[key(e)] * k) / 2, radiusUnits: 'pixels',
       getFillColor: [8, 16, 26, 225], updateTriggers: { getRadius: k },
+    }),
+    // 文字標籤：相遇在 zoom ≥ 3.5 顯示，徘徊／AIS 斷訊數量多，zoom ≥ 5.5 才顯示
+    new TextLayer<ActivityEvent>({
+      id: 'gfw-activity-tags',
+      data: badges.filter((e) => (e.kind === 'encounter' ? zoom >= 3.5 : zoom >= 5.5)),
+      getPosition: (e) => [e.lon, e.lat],
+      getText: (e) => TAG[key(e)],
+      getPixelOffset: (e) => [(SIZE[key(e)] * k) / 2 + 5, 0],
+      getSize: 11,
+      getColor: [8, 16, 26, 255],
+      getTextAnchor: 'start',
+      getAlignmentBaseline: 'center',
+      fontWeight: 600,
+      background: true,
+      getBackgroundColor: (e) => { const c = COLOR[key(e)]; return [c[0], c[1], c[2], 235] },
+      backgroundPadding: [5, 2],
+      fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", sans-serif',
+      characterSet: 'auto',
+      updateTriggers: { getPixelOffset: k },
     }),
     new IconLayer<ActivityEvent>({
       id: 'gfw-activity', data: badges, getPosition: (e) => [e.lon, e.lat], getIcon: (e) => ICON[key(e)],
