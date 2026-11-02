@@ -23,4 +23,13 @@
 .progress::after { content: ''; position: absolute; top: 0; bottom: 0; width: 30%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent); animation: scan 1.1s linear infinite; }
 .progress[data-done='true']::after { display: none; }
 @keyframes scan { from { left: -30%; } to { left: 100%; } }
-@media (prefers-reduced-motion: reduce) { .stroke { animation: none; stroke-dashoffset: 0; } .emblem { animation: none; } .progress::after { animation: none; } }
+/* 開場動畫不受全域「減少動態效果」影響（global.css 會把所有動畫壓到 0.01ms）：
+   只有約 2 秒、無位移與視差，是品牌開機效果。用類別＋!important 蓋過全域 * 規則 */
+@media (prefers-reduced-motion: reduce) {
+  .stroke { animation-duration: 0.7s !important; }
+  .emblem { animation-duration: 0.8s !important; }
+  .cursor { animation-duration: 1s !important; }
+  .spin { animation-duration: 0.9s !important; }
+  .progress::after { animation-duration: 1.1s !important; }
+  .progress > i { transition-duration: 0.3s !important; }
+}
