@@ -32,7 +32,7 @@ export function Sidebar({ alerts }: { alerts: number }) {
       <div className={s.caption}>工作空間</div>
       <div className={s.navItems}>
         {ITEMS.map((it) => (
-          <button key={it.view} className={s.item} title={it.label} aria-label={it.label} aria-current={view === it.view ? 'page' : undefined} onClick={() => setView(it.view)}>
+          <button key={it.view} className={s.item} title={it.label} aria-label={it.label} aria-current={view === it.view ? 'page' : undefined} data-mobile={it.view === 'buoys' || it.view === 'data' ? 'hide' : undefined} onClick={() => setView(it.view)}>
             {Icon[it.icon]}<span className={s.itemLabel}>{it.label}</span>
             {it.view === 'alerts' && alerts > 0 && <span className={s.badge}>{alerts}</span>}
           </button>

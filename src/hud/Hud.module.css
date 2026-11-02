@@ -10,3 +10,9 @@
   .page { right: 12px; }
   .bottom { right: 12px; bottom: 16px; z-index: 4; }
 }
+/* 手機：右側面板 → 底部抽屜；回放列隱藏；管理頁避開頂欄與分頁列 */
+@media (max-width: 640px) {
+  .right { top: auto; left: 10px; right: 10px; width: auto; bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 10px); max-height: 48vh; overflow: hidden; }
+  .bottom, .bottomLeft { display: none; }
+  .page { top: calc(var(--header-height) + 16px + env(safe-area-inset-top)); left: 10px; right: 10px; bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 10px); }
+}

@@ -57,3 +57,14 @@
 @media (min-width: 951px) and (max-width: 1150px) { .connectors { grid-template-columns: 1fr; } }
 @media (max-width: 1300px) { .side { width: 300px; padding: 20px; } .main { padding: 20px; } .table td, .table th { padding-inline: 10px; } }
 @media (max-width: 950px) { .page { flex-direction: column; height: auto; min-height: 100%; } .main { min-height: 430px; } .side { width: 100%; overflow: visible; } .scroll { max-height: 55vh; } }
+
+/* 手機：表格只留重點欄位（船舶：船名／狀態／油料；航次：船名／天數／狀態），其餘到桌機看 */
+@media (max-width: 640px) {
+  .vesselTable th:nth-child(2), .vesselTable td:nth-child(2), .vesselTable th:nth-child(4), .vesselTable td:nth-child(4),
+  .vesselTable th:nth-child(5), .vesselTable td:nth-child(5), .vesselTable th:nth-child(6), .vesselTable td:nth-child(6),
+  .vesselTable th:nth-child(8), .vesselTable td:nth-child(8) { display: none; }
+  .tripTable th:nth-child(2), .tripTable td:nth-child(2), .tripTable th:nth-child(5), .tripTable td:nth-child(5),
+  .tripTable th:nth-child(6), .tripTable td:nth-child(6), .tripTable th:nth-child(7), .tripTable td:nth-child(7) { display: none; }
+  .table td, .table th { padding-inline: 8px; }
+  .h1 { font-size: 24px; line-height: 30px; }
+}

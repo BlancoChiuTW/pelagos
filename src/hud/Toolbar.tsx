@@ -70,7 +70,7 @@ export function Toolbar({ fleet, layers, info }: { fleet: FleetItem[]; layers: R
           {open === 'layers' ? layers : info}
         </div>}
       </div>
-      {view === 'map' && <button className={s.btn} aria-expanded={replayOpen} onClick={() => setReplay(!replayOpen)}>{Icon.replay}<span>回放</span></button>}
+      {view === 'map' && <button className={`${s.btn} ${s.replay}`} aria-expanded={replayOpen} onClick={() => setReplay(!replayOpen)}>{Icon.replay}<span>回放</span></button>}
     </header>
   )
 }

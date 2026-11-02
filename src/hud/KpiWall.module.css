@@ -16,3 +16,10 @@
 .metrics button:hover { background: var(--fill); }
 .metrics b { display: block; margin-top: 5px; font: 500 22px/28px var(--font-ui); font-variant-numeric: tabular-nums; }
 .metrics small { margin-left: 6px; font: var(--t-caption); color: var(--label-3); }
+/* 手機：總覽精簡成一列數字＋分布條，次要指標收掉 */
+@media (max-width: 640px) {
+  .head .caption, .legend, .metrics { display: none; }
+  .hero { gap: 10px; }
+  .total { font-size: 28px !important; line-height: 32px !important; }
+}
+@media (max-width: 640px) { .head { margin-bottom: 6px !important; } .alert { padding: 8px 12px !important; } .bar { margin: 10px 0 0 !important; } }

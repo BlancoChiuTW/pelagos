@@ -1,3 +1,4 @@
 .panel { position: relative; background: var(--material); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--sep); border-radius: var(--radius-l); box-shadow: 0 8px 32px #0002; padding: 20px; pointer-events: auto; }
 .title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 18px; font: var(--t-headline); color: var(--label); }
 .title em { font-style: normal; font: var(--t-caption2); color: var(--label-3); letter-spacing: .04em; }
+@media (max-width: 640px) { .panel { padding: 14px 16px; border-radius: 16px; } }

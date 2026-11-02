@@ -46,3 +46,7 @@
 @media (max-width: 850px) {
   :root { --context-width: 280px; --header-height: 80px; }
 }
+/* 手機（iPhone 16 393×852 為基準）：底部分頁列＋底部抽屜 */
+@media (max-width: 640px) {
+  :root { --header-height: 56px; --workspace-left: 10px; --context-width: auto; --tabbar-height: 62px; --gap: 10px; }
+}

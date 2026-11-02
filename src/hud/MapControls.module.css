@@ -13,3 +13,5 @@
 .hint span { margin: 0 8px; }
 @media (max-width: 1100px) { .caption h1 { font-size: 22px; } .caption p { display: none; } .hint { display: none; } }
 @media (max-height: 700px) { .caption { top: 110px; } .caption h1 { font-size: 20px; margin: 4px 0; } .caption p, .tag { display: none; } }
+/* 手機：拿掉標語、提示與縮放鈕（雙指縮放） */
+@media (max-width: 640px) { .caption, .hint, .controls { display: none; } }

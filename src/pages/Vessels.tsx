@@ -49,7 +49,7 @@ export function Vessels({ fleet, now }: { fleet: FleetItem[]; now: number }) {
           <input className={s.search} aria-label="篩選船舶表格" placeholder="搜尋船名或編號" value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
         <div className={s.scroll}>
-          <table className={s.table}>
+          <table className={`${s.table} ${s.vesselTable}`}>
             <thead><tr>{th('name', '船名')}<th>類型</th>{th('status', '狀態')}<th>位置</th>{th('days', '航次天數')}{th('catch', '艙內漁獲')}{th('fuel', '油料')}{th('last', '最後回報')}</tr></thead>
             <tbody>
               {rows.map((f) => (

@@ -1,5 +1,5 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
-import { DEFAULT_VIEW } from '../map/camera'
+import { homeView } from '../map/camera'
 import { useStore } from '../store'
 import { Icon } from './icons'
 import s from './MapControls.module.css'
@@ -9,7 +9,7 @@ export function MapControls({ map }: { map: MapLibreMap | null }) {
   const layers = useStore((st) => st.layers)
   const reset = () => {
     useStore.getState().selectVessel(null)
-    map?.easeTo({ ...DEFAULT_VIEW, duration: 900 })
+    map?.easeTo({ ...homeView(), duration: 900 })
   }
   return <>
     <div className={s.caption}>

@@ -29,3 +29,15 @@
   .badge { position: absolute; right: 1px; top: 0; min-width: 16px; }
   .status { flex-wrap: wrap; justify-content: center; padding: 14px 0 0; }
 }
+/* 手機：側欄變成底部分頁列（iOS 樣式），只留四個主要分頁 */
+@media (max-width: 640px) {
+  .rail { inset: auto 0 0 0; width: auto; height: calc(var(--tabbar-height) + env(safe-area-inset-bottom)); flex-direction: row; padding: 6px 6px env(safe-area-inset-bottom); border-radius: 0; border-width: 1px 0 0; box-shadow: none; background: #0a1520f2; backdrop-filter: blur(20px); }
+  .brand, .workspace, .caption, .spacer, .demo, .status { display: none; }
+  .navItems { flex-direction: row; flex: 1; gap: 0; justify-content: space-around; }
+  .item { flex: 1; flex-direction: column; justify-content: center; gap: 2px; min-height: 50px; padding: 4px 0; border: 0; font: 500 10px/12px var(--font-ui); }
+  .item[aria-current='page'] { background: none; }
+  .item[aria-current='page']::before { display: none; }
+  .itemLabel { display: inline !important; }
+  .item[data-mobile='hide'] { display: none; }
+  .badge { position: absolute; top: 2px; left: calc(50% + 6px); right: auto; min-width: 16px; padding: 0 4px; background: var(--red); color: #fff; }
+}

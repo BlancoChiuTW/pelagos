@@ -88,7 +88,7 @@ export function Trips({ fleet, snap, now, onEvent }: { fleet: FleetItem[]; snap:
       <Panel className={s.main}>
         <div className={s.head}><div><h1 className={s.h1}>航次紀錄</h1><div className={s.sub}>從出港到返港，追蹤每趟航程的作業與漁獲。</div></div></div>
         <div className={s.scroll}>
-          <table className={s.table}>
+          <table className={`${s.table} ${s.tripTable}`}>
             <thead><tr><th>船名</th><th>出港</th><th>天數</th><th>狀態</th><th>下網</th><th>艙內漁獲</th><th>事件數</th></tr></thead>
             <tbody>
               {fleet.map((f) => (

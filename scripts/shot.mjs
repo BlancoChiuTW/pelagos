@@ -13,7 +13,10 @@ const browser = await chromium.launch({
   executablePath: `${dir}/${ver}/chrome-linux64/chrome`,
   args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 })
-const page = await browser.newPage({ viewport: { width: 1600, height: 900 } })
+// VIEWPORT="393x852" 模擬 iPhone 16（觸控、DPR 2）
+const [vw, vh] = (process.env.VIEWPORT ?? '1600x900').split('x').map(Number)
+const mobile = vw <= 640
+const page = await browser.newPage({ viewport: { width: vw, height: vh }, ...(mobile ? { isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : {}) })
 const logs = []
 page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`))
 page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`))
@@ -32,7 +35,7 @@ for (const [env, act] of [['MOUSE', 'move'], ['CLICK', 'click']]) {
   for (const pt of process.env[env].split(';')) { // 多點用分號：CLICK="47,390;900,200"
     const [x, y] = pt.split(',').map(Number)
     await page.mouse.move(x, y)
-    if (act === 'click') await page.mouse.click(x, y)
+    if (act === 'click') { if (mobile) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y) }
     await page.waitForTimeout(Number(process.env.AFTER ?? 1800))
   }
 }

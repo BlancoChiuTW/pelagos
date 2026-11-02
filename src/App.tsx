@@ -95,15 +95,17 @@ export default function App() {
   const selected = fleet.find((f) => f.vessel.id === selectedId) ?? null
   const selectedEvents = useMemo(() => (snap && selectedId ? snap.events.filter((e) => e.vesselId === selectedId) : []), [snap, selectedId])
 
+  // 手機：抽屜在下方，鏡頭中心往上偏；桌機：面板在右，往左偏
+  const camOffset = (): [number, number] => (window.innerWidth <= 640 ? [0, -Math.round(window.innerHeight * 0.2)] : [-190, 0])
   // 選船 → 鏡頭移過去（右側面板 360px，中心往左偏）
   useEffect(() => {
     if (!h || !selectedId) return
     const item = fleet.find((f) => f.vessel.id === selectedId)
-    if (item) h.map.easeTo({ center: [item.pose.lon, item.pose.lat], zoom: Math.max(h.map.getZoom(), 5.2), offset: [-190, 0], duration: 1200 })
+    if (item) h.map.easeTo({ center: [item.pose.lon, item.pose.lat], zoom: Math.max(h.map.getZoom(), 5.2), offset: camOffset(), duration: 1200 })
     // 只在選擇改變時移動
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [h, selectedId])
-  const flyToEvent = (e: TripEvent) => h?.map.flyTo({ center: [e.lon, e.lat], zoom: Math.max(h.map.getZoom(), 6), offset: [-190, 0], duration: 1400 })
+  const flyToEvent = (e: TripEvent) => h?.map.flyTo({ center: [e.lon, e.lat], zoom: Math.max(h.map.getZoom(), 6), offset: camOffset(), duration: 1400 })
 
   // 管理頁點事件 → 回地圖、選船、飛到事件（等選船的鏡頭移動結束）
   const goEvent = (e: TripEvent) => {
