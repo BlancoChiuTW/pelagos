@@ -2,7 +2,7 @@
 import { create } from 'zustand'
 import type { Epoch } from './data/types'
 
-export type LayerKey = 'sst' | 'anomaly' | 'currents' | 'buoys' | 'others' | 'fleet' | 'hotspot' | 'track' | 'gfw' | 'ports' | 'activity' | 'aisgap'
+export type LayerKey = 'sst' | 'anomaly' | 'currents' | 'buoys' | 'others' | 'fleet' | 'hotspot' | 'track' | 'gfw' | 'ports' | 'activity' | 'aisgap' | 'eez'
 export type OthersCount = 10000 | 50000 | 100000
 /** 回放速度：每秒快轉幾分鐘（10 分／30 分／1 小時，預設 30 分） */
 export type Speed = 10 | 30 | 60
@@ -55,7 +55,7 @@ export interface AppState {
 
 export const useStore = create<AppState>()((set) => ({
   // v3 減法：預設只開船隊＋航跡，海溫淡化當背景（PRD §15.3）
-  layers: { sst: true, anomaly: false, currents: false, buoys: false, others: false, fleet: true, hotspot: false, track: true, gfw: true, ports: true, activity: true, aisgap: false },
+  layers: { sst: true, anomaly: false, currents: false, buoys: false, others: false, fleet: true, hotspot: false, track: true, gfw: true, ports: true, activity: true, aisgap: false, eez: true },
   view: 'map',
   gfwGear: 'pelagic',
   setGfwGear: (gfwGear) => set({ gfwGear }),

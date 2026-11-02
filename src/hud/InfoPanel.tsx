@@ -21,6 +21,7 @@ export function InfoPanel({ grid }: { grid: OceanGrid | null }) {
       <div style={row}><span>洋流</span><span style={{ color: 'var(--label-2)' }}>NOAA NESDIS · {grid ? day(grid.meta.u.time) : '—'}</span></div>
       <div style={row}><span>船隊／航次／浮標</span><span style={{ color: 'var(--orange)' }}>模擬資料</span></div>
       <div style={row}><span>周邊漁船活動</span><span style={{ color: 'var(--label-2)' }}>Global Fishing Watch · AIS</span></div>
+      <div style={row}><span>經濟海域</span><span style={{ color: 'var(--label-2)' }}>Marine Regions · CC BY 4.0</span></div>
       <div style={row}><span>陸地／底圖</span><span style={{ color: 'var(--label-2)' }}>Natural Earth · CARTO</span></div>
       <div className={s.group}>展示</div>
       <button className={s.item} aria-pressed={demo} onClick={() => setDemo(!demo)}>展示模式（效能 HUD）<span className={s.switch} /></button>

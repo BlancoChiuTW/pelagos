@@ -7,7 +7,10 @@ const OURS = new Set([HOME_PORT, ...TRANSSHIP_PORTS].map((p) => p.name.toLowerCa
 export const isOurPort = (p: Port) => [...OURS].some((n) => p.name.toLowerCase().startsWith(n))
 const r = (p: Port) => Math.min(16, 3 + Math.sqrt(p.visits) * 0.75)
 
-export function createPortLayers(ports: Port[], zoom: number) {
+export function createPortLayers(all: Port[], zoom: number) {
+  // 依縮放分級：拉遠只畫大港與藍潮常用港，避免東亞沿岸數百個漁港糊成一片
+  const minVisits = zoom < 4 ? 60 : zoom < 5 ? 15 : 0
+  const ports = all.filter((p) => isOurPort(p) || p.visits >= minVisits)
   const labeled = ports.filter((p, i) => isOurPort(p) || (zoom >= 5 ? i < 120 : zoom >= 4 ? i < 8 : false))
   return [
     new ScatterplotLayer<Port>({

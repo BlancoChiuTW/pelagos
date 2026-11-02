@@ -10,6 +10,7 @@ import type { ActivityEvent, Port, TripEvent } from './data/types'
 import { ACTIVITY_LABEL } from './layers/activity'
 import { mountOceanRasters, setRasterVisible } from './layers/sst'
 import { showGfw } from './layers/gfwRaster'
+import { mountEez, setEezVisible } from './layers/eez'
 import { CurrentsCanvas } from './layers/currents/CurrentsCanvas'
 import { buoyFrame } from './layers/buoys'
 import { useOthers } from './sim/useOthers'
@@ -97,6 +98,14 @@ export default function App() {
   const live = useTicker(500)
   const scrub = useStore((s) => s.scrub)
   const replayOpen = useStore((s) => s.replayOpen)
+  // EEZ／PNA：底圖就緒後掛一次，之後只切換顯示
+  const [eezReady, setEezReady] = useState(false)
+  useEffect(() => {
+    if (h && grid) mountEez(h.map).then(() => setEezReady(true)).catch(() => {})
+  }, [h, grid])
+  useEffect(() => {
+    if (h && eezReady) setEezVisible(h.map, rawFlags.eez && stage >= 3)
+  }, [h, eezReady, rawFlags.eez, stage])
   // GFW 只在資料、漁具或開關改變時重畫一次（不隨時間或鏡頭重算）
   useEffect(() => {
     if (h && grid) showGfw(h.map, gfw, gfwGear, layerFlags.gfw)

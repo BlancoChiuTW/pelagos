@@ -37,7 +37,7 @@ export function MapView({ layers, getTooltip, onReady }: Props) {
       zoom: INTRO_START.zoom,
       renderWorldCopies: true,
       // 條款要求標示 GFW 出處（周邊漁船活動）
-      attributionControl: { compact: true, customAttribution: 'Fishing activity © Global Fishing Watch' },
+      attributionControl: { compact: true, customAttribution: 'Fishing activity © Global Fishing Watch · EEZ © Marine Regions (VLIZ, CC BY 4.0)' },
     })
     const overlay = new MapboxOverlay({ interleaved: false, layers: [] })
     overlayRef.current = overlay
