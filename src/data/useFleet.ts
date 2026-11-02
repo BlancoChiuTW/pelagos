@@ -4,6 +4,7 @@ import { dataSource } from './DataSource'
 import type { Epoch, FleetSnapshot, OceanGrid, Position, Trip, Vessel, VesselStatus } from './types'
 import { groupTracks, poseAt, type Pose } from '../sim/interp'
 import { statusOf } from '../sim/status'
+import { mergeSnapshot, useOverrides } from './overrides'
 
 export interface FleetItem { vessel: Vessel; trip: Trip; track: Position[]; pose: Pose; status: VesselStatus }
 
@@ -17,7 +18,8 @@ export function useFleetSnapshot(grid: OceanGrid | null, now: Epoch): FleetSnaps
       alive = false
     }
   }, [grid, now])
-  return snap
+  const added = useOverrides((o) => o.events)
+  return useMemo(() => (snap ? mergeSnapshot(snap, added) : null), [snap, added])
 }
 
 export function useFleetItems(snap: FleetSnapshot | null, t: Epoch): FleetItem[] {

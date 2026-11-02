@@ -25,6 +25,13 @@ import { VesselCard } from './hud/VesselCard'
 import { PerfHud, useFps } from './hud/PerfHud'
 import { BootSequence } from './hud/BootSequence'
 import { Placeholder } from './pages/Placeholder'
+import { Vessels } from './pages/Vessels'
+import { Trips } from './pages/Trips'
+import { Alerts } from './pages/Alerts'
+import { Buoys } from './pages/Buoys'
+import { buildAlerts } from './sim/alerts'
+import { useOverrides } from './data/overrides'
+import type { Alert } from './data/types'
 
 // 滑過船隻的小卡（V02）
 const tooltip = (info: PickingInfo) => {
@@ -84,10 +91,29 @@ export default function App() {
   }, [h, selectedId])
   const flyToEvent = (e: TripEvent) => h?.map.flyTo({ center: [e.lon, e.lat], zoom: Math.max(h.map.getZoom(), 6), offset: [-190, 0], duration: 1400 })
 
+  // 管理頁點事件 → 回地圖、選船、飛到事件（等選船的鏡頭移動結束）
+  const goEvent = (e: TripEvent) => {
+    useStore.getState().setView('map')
+    selectVessel(e.vesselId)
+    setTimeout(() => flyToEvent(e), 1300)
+  }
   const fps = useFps()
   const points = (others?.count ?? 0) + (buoys?.n ?? 0) + fleet.length
-  // 警示數暫以「訊號中斷＋油料 < 20%」計，M04 警示中心完成後改用 alerts.ts
-  const alertCount = fleet.filter((f) => f.status === 'signal_lost' || f.trip.summary.fuelPct < 20).length
+  const alerts = useMemo(() => (snap ? buildAlerts(fleet, snap, t) : []), [fleet, snap, t])
+  const ack = useOverrides((o) => o.ack)
+  const alertCount = alerts.filter((a) => a.level !== 'info' && !ack[a.id]).length
+  const locateAlert = (a: Alert) => {
+    useStore.getState().setView('map')
+    if (a.vesselId) selectVessel(a.vesselId)
+    else if (a.lon !== undefined && a.lat !== undefined) h?.map.flyTo({ center: [a.lon, a.lat], zoom: 6 })
+  }
+  const goBuoy = (lon: number, lat: number) => {
+    const st = useStore.getState()
+    st.setView('map')
+    st.setLayer('buoys', true)
+    st.selectVessel(null)
+    h?.map.flyTo({ center: [lon, lat], zoom: 7.5, duration: 1600 })
+  }
 
   const layers = useMemo<Layer[]>(
     () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t }),
@@ -109,7 +135,10 @@ export default function App() {
         <Sidebar alerts={alertCount} />
         {onMap && <Toolbar fleet={fleet} layers={<LayerPanel />} info={<InfoPanel grid={grid} />} />}
         <Hud
-          page={onMap ? undefined : <Placeholder view={view} />}
+          page={onMap ? undefined : view === 'vessels' ? <Vessels fleet={fleet} now={t} /> : view === 'trips' && snap ? <Trips fleet={fleet} snap={snap} now={t} onEvent={goEvent} />
+              : view === 'alerts' ? <Alerts alerts={alerts} onLocate={locateAlert} />
+              : view === 'buoys' && snap ? <Buoys snap={snap} fleet={fleet} trackStart={trackStart} now={t} onGo={goBuoy} />
+              : <Placeholder view={view} />}
           right={
             <AnimatePresence mode="wait">
               {selected && grid ? (
