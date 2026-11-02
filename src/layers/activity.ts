@@ -1,7 +1,7 @@
-// 可疑活動（GFW 事件）：地圖標記針＋彩色文字標籤
+// 可疑活動（GFW 事件）：地圖標記針（只用圖示；靠近的事件聚合，滑過看明細）
 //   橘：疑似海上轉載（兩船並排＋雙向箭頭）  藍：海上加油（油滴）
 //   琥珀：運搬船徘徊（繞圈箭頭）            紅：AIS 刻意關閉（訊號＋斜線）
-import { IconLayer, ScatterplotLayer, TextLayer } from '@deck.gl/layers'
+import { IconLayer } from '@deck.gl/layers'
 import type { ActivityEvent } from '../data/types'
 
 // 地圖標記針（水滴形，針尖＝事件位置）：針身＝事件色、白色符號；港口用圓形錨徽章，一看就分得出「地點」與「事件」
@@ -19,55 +19,53 @@ const pin = (k: keyof typeof GLYPH) => ({
 const ICON = { transshipment: pin('transshipment'), bunkering: pin('bunkering'), loitering: pin('loitering'), gap: pin('gap') }
 type Key = keyof typeof ICON
 const key = (e: ActivityEvent): Key => (e.kind === 'encounter' ? (e.encounterType === 'transshipment' ? 'transshipment' : 'bunkering') : e.kind)
-type RGBA = [number, number, number, number]
-const COLOR: Record<Key, RGBA> = {
-  transshipment: [255, 159, 10, 255],
-  bunkering: [100, 210, 255, 245],
-  loitering: [255, 204, 102, 220],
-  gap: [255, 69, 58, 235],
-}
-const SIZE: Record<Key, number> = { transshipment: 32, bunkering: 28, loitering: 22, gap: 22 } // 標記針高度（px）
-
-/** 徽章旁的文字標籤（不用查圖例就看懂） */
-const TAG: Record<Key, string> = { transshipment: '轉載', bunkering: '加油', loitering: '徘徊', gap: 'AIS 斷訊' }
+const SIZE: Record<Key, number> = { transshipment: 32, bunkering: 28, loitering: 24, gap: 24 } // 標記針高度（px）
 
 export const ACTIVITY_LABEL = { encounter: '海上相遇', loitering: '運搬船徘徊', gap: 'AIS 刻意關閉' } as const
 
-export function createActivityLayer(events: ActivityEvent[], showGaps: boolean, zoom: number) {
-  // 拉遠時徘徊事件（數量多）縮成小點，只保留相遇徽章，避免雜訊
-  const all = events.filter((e) => e.kind !== 'gap' || showGaps)
-  const far = zoom < 4
-  const badges = far ? all.filter((e) => e.kind === 'encounter') : all
-  const dots = far ? all.filter((e) => e.kind !== 'encounter') : []
-  const k = zoom >= 5 ? 1.25 : 1
+/** 聚合後的一根針：畫面上 CELL_PX 內的事件合併，顏色取最重要的類型（轉載 > 加油 > AIS 斷訊 > 徘徊） */
+export interface ActivityCluster {
+  lon: number
+  lat: number
+  key: Key
+  counts: Record<Key, number>
+  events: ActivityEvent[]
+}
+const CELL_PX = 36
+const PRIORITY: Key[] = ['transshipment', 'bunkering', 'gap', 'loitering']
+
+function cluster(events: ActivityEvent[], zoom: number): ActivityCluster[] {
+  const cell = (CELL_PX * 360) / (512 * 2 ** zoom) // 這個縮放下 36px 約是幾度
+  const groups = new Map<string, ActivityEvent[]>()
+  for (const e of events) {
+    const id = `${Math.floor(e.lon / cell)}:${Math.floor(e.lat / cell)}`
+    const g = groups.get(id)
+    if (g) g.push(e)
+    else groups.set(id, [e])
+  }
+  return [...groups.values()].map((es) => {
+    const counts = { transshipment: 0, bunkering: 0, loitering: 0, gap: 0 }
+    for (const e of es) counts[key(e)]++
+    return {
+      lon: es.reduce((a, e) => a + e.lon, 0) / es.length,
+      lat: es.reduce((a, e) => a + e.lat, 0) / es.length,
+      key: PRIORITY.find((k) => counts[k] > 0) ?? 'loitering',
+      counts,
+      events: es,
+    }
+  })
+}
+
+export function createActivityLayers(events: ActivityEvent[], showGaps: boolean, zoom: number) {
+  // 任何縮放都畫針（不再縮成小點而像消失）；靠近的事件聚合成一根針，避免疊圖看不清
+  const clusters = cluster(events.filter((e) => e.kind !== 'gap' || showGaps), zoom)
+  const k = zoom >= 5 ? 1.15 : zoom < 3 ? 0.85 : 1
+  // 只用圖示不加文字（Blanco：文字太雜）；聚合件數用針的大小表示，滑過看明細
+  const size = (c: ActivityCluster) => SIZE[c.key] * k * Math.min(1.45, 1 + (c.events.length - 1) * 0.08)
   return [
-    new ScatterplotLayer<ActivityEvent>({
-      id: 'gfw-activity-dots', data: dots, getPosition: (e) => [e.lon, e.lat], getRadius: 2.5, radiusUnits: 'pixels',
-      getFillColor: (e) => { const c = COLOR[key(e)]; return [c[0], c[1], c[2], 150] }, pickable: true,
-    }),
-    // 文字標籤：相遇在 zoom ≥ 3.5 顯示，徘徊／AIS 斷訊數量多，zoom ≥ 5.5 才顯示
-    new TextLayer<ActivityEvent>({
-      id: 'gfw-activity-tags',
-      data: badges.filter((e) => (e.kind === 'encounter' ? zoom >= 3.5 : zoom >= 5.5)),
-      getPosition: (e) => [e.lon, e.lat],
-      getText: (e) => TAG[key(e)],
-      getPixelOffset: (e) => [SIZE[key(e)] * k * 0.42 + 4, -SIZE[key(e)] * k * 0.62], // 針頭右側
-      getSize: 11,
-      getColor: [8, 16, 26, 255],
-      getTextAnchor: 'start',
-      getAlignmentBaseline: 'center',
-      fontWeight: 600,
-      background: true,
-      getBackgroundColor: (e) => { const c = COLOR[key(e)]; return [c[0], c[1], c[2], 235] },
-      backgroundPadding: [5, 2],
-      fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", sans-serif',
-      characterSet: 'auto',
-      updateTriggers: { getPixelOffset: k },
-    }),
-    new IconLayer<ActivityEvent>({
-      id: 'gfw-activity', data: badges, getPosition: (e) => [e.lon, e.lat], getIcon: (e) => ICON[key(e)],
-      getSize: (e) => SIZE[key(e)] * k, sizeUnits: 'pixels', pickable: true,
-      updateTriggers: { getSize: k },
+    new IconLayer<ActivityCluster>({
+      id: 'gfw-activity', data: clusters, getPosition: (c) => [c.lon, c.lat], getIcon: (c) => ICON[c.key],
+      getSize: size, sizeUnits: 'pixels', pickable: true, updateTriggers: { getSize: k },
     }),
   ]
 }

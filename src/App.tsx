@@ -6,8 +6,8 @@ import { buildLayers } from './map/layerStack'
 import { useMapZoom } from './map/useMapZoom'
 import { useActivity, useFishingEffort, useOcean, usePorts } from './data/useOcean'
 import { useFleetItems, useFleetSnapshot, type FleetItem } from './data/useFleet'
-import type { ActivityEvent, Port, TripEvent } from './data/types'
-import { ACTIVITY_LABEL } from './layers/activity'
+import type { Port, TripEvent } from './data/types'
+import { ACTIVITY_LABEL, type ActivityCluster } from './layers/activity'
 import { mountOceanRasters, setRasterVisible } from './layers/sst'
 import { showGfw } from './layers/gfwRaster'
 import { mountEez, setEezVisible } from './layers/eez'
@@ -42,11 +42,17 @@ import type { Alert } from './data/types'
 
 // 滑過船隻的小卡（V02）
 const tooltip = (info: PickingInfo) => {
-  const ev = info.object as ActivityEvent | undefined
-  if (ev && 'kind' in ev && ev.kind) {
-    const when = new Date(ev.start).toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' })
-    const what = ev.kind === 'encounter' ? (ev.encounterType === 'transshipment' ? '運搬船與漁船相遇（疑似海上轉載）' : '加油船與漁船相遇（海上補給）') : ev.kind === 'loitering' ? `運搬船徘徊 ${ev.hours} 小時` : `AIS 關閉 ${ev.hours} 小時`
-    return { html: `<b>${ACTIVITY_LABEL[ev.kind]}</b><br/>${what}<br/>${when}・船籍 ${(ev.flags ?? [ev.flag]).join('／') || '—'}<br/><span style="opacity:.6">資料：Global Fishing Watch</span>` }
+  const cl = info.object as ActivityCluster | undefined
+  if (cl && 'counts' in cl) {
+    const e = cl.events[0]
+    const when = new Date(e.start).toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' })
+    if (cl.events.length === 1) {
+      const what = e.kind === 'encounter' ? (e.encounterType === 'transshipment' ? '運搬船與漁船相遇（疑似海上轉載）' : '加油船與漁船相遇（海上補給）') : e.kind === 'loitering' ? `運搬船徘徊 ${e.hours} 小時` : `AIS 關閉 ${e.hours} 小時`
+      return { html: `<b>${ACTIVITY_LABEL[e.kind]}</b><br/>${what}<br/>${when}・船籍 ${(e.flags ?? [e.flag]).join('／') || '—'}<br/><span style="opacity:.6">資料：Global Fishing Watch</span>` }
+    }
+    const rows = [['transshipment', '疑似海上轉載'], ['bunkering', '海上加油'], ['gap', 'AIS 刻意關閉'], ['loitering', '運搬船徘徊']] as const
+    const list = rows.filter(([k]) => cl.counts[k] > 0).map(([k, l]) => `${l} ${cl.counts[k]} 起`).join('<br/>')
+    return { html: `<b>此區 ${cl.events.length} 起可疑活動</b><br/>${list}<br/><span style="opacity:.6">拉近可分開檢視・資料：Global Fishing Watch</span>` }
   }
   const port = info.object as Port | undefined
   if (port && 'visits' in port) {
