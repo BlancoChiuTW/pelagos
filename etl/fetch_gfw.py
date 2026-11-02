@@ -90,9 +90,12 @@ def fetch_mock() -> dict:
     return {"metadata": {"mock": True, "note": "PELAGOS 模擬資料（GFW 4Wings 回應格式）"}, "entries": [{"public-global-fishing-effort:v3.0": rows}]}
 
 
+BIN = 0.5  # 前端用的彙整格（GFW LOW＝0.1°，10 萬格 3.6 MB 太大）
+
+
 def normalize(resp: dict, mode: str) -> dict:
-    """GFW 回應 → 前端精簡格式。live 與 mock 共用這一段（同一個解析器）"""
-    cells = []
+    """GFW 回應 → 前端精簡格式（彙整到 0.5°）。live 與 mock 共用這一段（同一個解析器）"""
+    acc: dict[tuple, list] = {}
     for entry in resp.get("entries", []):
         for dataset, items in entry.items():
             for it in items or []:
@@ -100,9 +103,14 @@ def normalize(resp: dict, mode: str) -> dict:
                 if g not in GEARS:
                     GEARS.append(g)
                 lon = float(it["lon"])
-                cells.append([round(lon + 360 if lon < 0 else lon, 2), round(float(it["lat"]), 2), float(it.get("hours") or 0), GEARS.index(g), int(it.get("vesselIDs") or 0)])
+                lon = lon + 360 if lon < 0 else lon
+                key = (int(lon // BIN), int(float(it["lat"]) // BIN), GEARS.index(g))
+                a = acc.setdefault(key, [0.0, 0])
+                a[0] += float(it.get("hours") or 0)
+                a[1] += int(it.get("vesselIDs") or 0)  # 0.1° 格的船數相加＝船格次（同船跨格會重複計）
+    cells = [[round((x + 0.5) * BIN, 2), round((y + 0.5) * BIN, 2), round(h, 1), gi, v] for (x, y, gi), (h, v) in acc.items() if h >= 0.5]
     return {
-        "mode": mode, "dataset": DATASET, "dateRange": [str(start), str(end)], "resolution": "LOW" if mode == "live" else "0.5°（模擬）",
+        "mode": mode, "dataset": DATASET, "dateRange": [str(start), str(end)], "resolution": "GFW LOW 0.1° → 彙整 0.5°" if mode == "live" else "0.5°（模擬）",
         "gears": GEARS, "columns": ["lon", "lat", "hours", "gear", "vessels"], "cells": cells,
         "source": "Global Fishing Watch 4Wings · AIS 表觀捕魚努力量" + ("" if mode == "live" else "（模擬，待 API token）"),
     }

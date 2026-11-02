@@ -36,7 +36,8 @@ export function MapView({ layers, getTooltip, onReady }: Props) {
       center: INTRO_START.center, // 開機序列從高空俯衝到 DEFAULT_VIEW（X01）
       zoom: INTRO_START.zoom,
       renderWorldCopies: true,
-      attributionControl: { compact: true },
+      // 條款要求標示 GFW 出處（周邊漁船活動）
+      attributionControl: { compact: true, customAttribution: 'Fishing activity © Global Fishing Watch' },
     })
     const overlay = new MapboxOverlay({ interleaved: false, layers: [] })
     overlayRef.current = overlay

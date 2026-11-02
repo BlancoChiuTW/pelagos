@@ -3,9 +3,12 @@ import { HeatmapLayer } from '@deck.gl/aggregation-layers'
 import type { FishingEffort } from '../data/types'
 
 type Cell = FishingEffort['cells'][number]
+// GFW geartype → 中文
 export const GEAR_LABEL: Record<string, string> = {
-  tuna_purse_seines: '鮪圍網', drifting_longlines: '流刺延繩釣', squid_jigger: '魷釣', pole_and_line: '竿釣',
-  trawlers: '拖網', other_purse_seines: '其他圍網', fishing: '其他',
+  tuna_purse_seines: '鮪圍網', purse_seines: '圍網（未細分）', other_purse_seines: '其他圍網',
+  drifting_longlines: '漂流延繩釣', set_longlines: '底延繩釣', squid_jigger: '魷釣', pole_and_line: '竿釣',
+  trawlers: '拖網', driftnets: '流刺網', set_gillnets: '定置刺網', fixed_gear: '定置漁具', pots_and_traps: '籠具',
+  fishing: '未分類漁船',
 }
 
 export function createGfwLayer(e: FishingEffort, gear: string) {
@@ -15,7 +18,8 @@ export function createGfwLayer(e: FishingEffort, gear: string) {
     id: 'gfw-effort',
     data,
     getPosition: (c) => [c[0], c[1]],
-    getWeight: (c) => c[2],
+    // 對數權重：真實資料裡中國沿岸拖網時數是鮪圍網的數百倍，用線性會把其他漁場全部壓掉
+    getWeight: (c) => Math.log1p(c[2]),
     radiusPixels: 26,
     intensity: 1.1,
     threshold: 0.04,

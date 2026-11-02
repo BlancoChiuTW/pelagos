@@ -149,7 +149,7 @@ export function DataHub({ grid, snap, now, fleet, trackStart, gfw }: { grid: Oce
               <div className={s.section} style={{ marginTop: 0 }}>Global Fishing Watch 介面</div>
               <div className={s.dim} style={{ marginBottom: 10 }}>
                 {gfw?.mode === 'live'
-                  ? '真實資料：由 GFW API 取得的 AIS 表觀捕魚努力量。'
+                  ? '真實資料：由 GFW API 取得的 AIS 表觀捕魚努力量（資料來源：Global Fishing Watch，非商業用途授權）。真實分布裡，東亞沿岸拖網時數遠多於遠洋鮪圍網，所以熱度用對數權重。'
                   : '目前是模擬資料：格式與 GFW API 回應完全相同、走同一個解析器；取得 API token 後設為 CI 的 GFW_TOKEN，排程就會改抓真實資料，前端不用改。'}
                 GFW 資料約延遲 4–5 天；AIS 可被關閉、遠洋需衛星 AIS，所以這層代表「周邊漁船活動的熱度」，不是即時船位。自家船隊的即時位置仍以 VMS 為準。
               </div>
