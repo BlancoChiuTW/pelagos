@@ -14,7 +14,7 @@ const loadNow = Math.floor(Date.now() / HOUR) * HOUR // SIM_NOW：取整到小�
 
 export interface AppState {
   view: View
-  /** 周邊漁船活動的漁具篩選（'all' 或 GFW geartype） */
+  /** 周邊漁船活動的漁具篩選：'pelagic'（遠洋，預設）、'all' 或 GFW geartype */
   gfwGear: string
   setGfwGear: (g: string) => void
   /** 展示模式：顯示效能 HUD 與壓力測試開關 */
@@ -57,7 +57,7 @@ export const useStore = create<AppState>()((set) => ({
   // v3 減法：預設只開船隊＋航跡，海溫淡化當背景（PRD §15.3）
   layers: { sst: true, anomaly: false, currents: false, buoys: false, others: false, fleet: true, hotspot: false, track: true, gfw: true },
   view: 'map',
-  gfwGear: 'all',
+  gfwGear: 'pelagic',
   setGfwGear: (gfwGear) => set({ gfwGear }),
   demoMode: false,
   setView: (view) => set({ view }),

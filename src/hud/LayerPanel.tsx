@@ -34,7 +34,8 @@ export function LayerPanel({ gears = [] }: { gears?: string[] }) {
             {it.key === 'gfw' && layers.gfw && gears.length > 0 && (
               <select value={gear} onChange={(e) => setGear(e.target.value)} aria-label="漁具篩選"
                 style={{ margin: '0 4px 6px', width: 'calc(100% - 8px)', height: 30, borderRadius: 8, border: 0, background: 'var(--fill)', color: 'var(--label)', font: 'var(--t-footnote)', padding: '0 8px' }}>
-                <option value="all">全部漁具</option>
+                <option value="pelagic">遠洋漁業（圍網、延繩釣、魷釣）</option>
+                <option value="all">全部漁具（含沿岸拖網）</option>
                 {gears.map((g) => <option key={g} value={g}>{GEAR_LABEL[g] ?? g}</option>)}
               </select>
             )}

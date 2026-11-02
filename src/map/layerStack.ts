@@ -8,8 +8,6 @@ import { createOthersLayer } from '../layers/others'
 import { createBuoyLayer, type BuoyFrame } from '../layers/buoys'
 import { createTripTrackLayers } from '../layers/tripTrack'
 import { createImportLayers } from '../layers/imports'
-import { createGfwLayer } from '../layers/gfw'
-import type { FishingEffort } from '../data/types'
 import type { ImportLayer } from '../data/overrides'
 import type { Epoch, TripEvent } from '../data/types'
 
@@ -26,13 +24,10 @@ export interface StackInput {
   trackStart: Epoch
   t: Epoch
   imports: ImportLayer[]
-  gfw: FishingEffort | null
-  gfwGear: string
 }
 
 export function buildLayers(i: StackInput): Layer[] {
   const out: Layer[] = []
-  if (i.layers.gfw && i.gfw) out.push(createGfwLayer(i.gfw, i.gfwGear))
   if (i.layers.others && i.others) out.push(createOthersLayer(i.others, i.zoom))
   if (i.layers.buoys && i.buoys) out.push(createBuoyLayer(i.buoys, i.zoom))
   if (i.imports.length) out.push(...createImportLayers(i.imports, i.zoom))

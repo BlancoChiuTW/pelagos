@@ -8,6 +8,7 @@ import { useFishingEffort, useOcean } from './data/useOcean'
 import { useFleetItems, useFleetSnapshot, type FleetItem } from './data/useFleet'
 import type { TripEvent } from './data/types'
 import { mountOceanRasters, setRasterVisible } from './layers/sst'
+import { showGfw } from './layers/gfwRaster'
 import { CurrentsCanvas } from './layers/currents/CurrentsCanvas'
 import { buoyFrame } from './layers/buoys'
 import { useOthers } from './sim/useOthers'
@@ -80,6 +81,10 @@ export default function App() {
   const live = useTicker(500)
   const scrub = useStore((s) => s.scrub)
   const replayOpen = useStore((s) => s.replayOpen)
+  // GFW 只在資料、漁具或開關改變時重畫一次（不隨時間或鏡頭重算）
+  useEffect(() => {
+    if (h && grid) showGfw(h.map, gfw, gfwGear, layerFlags.gfw)
+  }, [h, grid, gfw, gfwGear, layerFlags.gfw])
   const t = scrub ?? live // 回放時用回放時間（F12）
   const zoom = useMapZoom(h?.map ?? null)
   const snap = useFleetSnapshot(grid, now)
@@ -126,8 +131,8 @@ export default function App() {
   }
 
   const layers = useMemo<Layer[]>(
-    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t, imports, gfw, gfwGear }),
-    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t, imports, gfw, gfwGear],
+    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t, imports }),
+    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t, imports],
   )
   const introDone = useCallback(() => setIntro('done'), [setIntro])
   const bootSteps = [
