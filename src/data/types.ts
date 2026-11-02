@@ -30,6 +30,8 @@ export interface Trip {
   departPort: string
   status: 'active' | 'returned'
   summary: TripSummary
+  /** 預定航線目的地（運搬船），戰略地圖畫虛線＋ETA */
+  plan?: { name: string; lon: Lon; lat: Lat }
 }
 
 export type EventType = 'depart' | 'set' | 'deploy_buoy' | 'transship' | 'port_call' | 'bunker' | 'signal_lost'

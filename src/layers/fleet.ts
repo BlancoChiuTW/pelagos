@@ -1,6 +1,10 @@
 // 自家船隊（V02 戰略地圖表現）：航跡拖尾 → 狀態環 → 俯視剪影 → 名牌
 import { IconLayer, ScatterplotLayer, TextLayer } from '@deck.gl/layers'
 import { TripsLayer } from '@deck.gl/geo-layers'
+import { PathLayer } from '@deck.gl/layers'
+import { PathStyleExtension, type PathStyleExtensionProps } from '@deck.gl/extensions'
+import { smoothTrack } from '../sim/smooth'
+import { distNm } from '../sim/geo'
 import type { Layer } from '@deck.gl/core'
 import type { Epoch, VesselStatus } from '../data/types'
 import type { FleetItem } from '../data/useFleet'
@@ -50,21 +54,62 @@ export function createFleetLayers({ items, selectedId, zoom, showTrails, trackSt
   const pick = (id: string) => onSelect(id)
 
   if (showTrails) {
+    // 平滑航跡（Catmull-Rom），兩層：寬淡光暈＋細亮主線（加法混色）
+    const trails = items.map((d) => {
+      const sm = smoothTrack(d.track.map((p) => [p.lon, p.lat] as [number, number]), d.track.map((p) => (p.at - trackStart) / HOUR))
+      return { id: d.vessel.id, sel: d.vessel.id === selectedId, ...sm }
+    })
+    type T = (typeof trails)[number]
+    const common = {
+      data: trails,
+      getPath: (d: T) => d.path,
+      getTimestamps: (d: T) => d.times,
+      widthUnits: 'pixels' as const,
+      currentTime: now,
+      trailLength: 24,
+      fadeTrail: true,
+      capRounded: true,
+      jointRounded: true,
+      parameters: { blendColorSrcFactor: 'src-alpha', blendColorDstFactor: 'one' } as const,
+      updateTriggers: { getColor: selectedId, getWidth: selectedId },
+    }
     out.push(
-      new TripsLayer<FleetItem>({
-        id: 'fleet-trails',
-        data: items,
-        getPath: (d) => d.track.map((p) => [p.lon, p.lat] as [number, number]),
-        getTimestamps: (d) => d.track.map((p) => (p.at - trackStart) / HOUR),
-        getColor: (d) => (d.vessel.id === selectedId ? TINT : [190, 232, 255, 215]),
-        getWidth: (d) => (d.vessel.id === selectedId ? 3.5 : 2.4),
+      new TripsLayer<T>({ ...common, id: 'fleet-trails-glow', getColor: (d) => (d.sel ? [100, 210, 255, 90] : [120, 200, 255, 45]), getWidth: (d) => (d.sel ? 10 : 7) }),
+      new TripsLayer<T>({ ...common, id: 'fleet-trails', getColor: (d) => (d.sel ? [190, 240, 255, 255] : [170, 225, 255, 200]), getWidth: (d) => (d.sel ? 3 : 1.8) }),
+    )
+    // 預定航線（運搬船）：虛線到目的地＋ETA，像戰略遊戲的移動指令
+    const plans = items.filter((d) => d.trip.plan && d.pose.sog > 1 && d.status !== 'signal_lost')
+    type P = FleetItem
+    out.push(
+      new PathLayer<P, PathStyleExtensionProps<P>>({
+        id: 'fleet-plans',
+        data: plans,
+        getPath: (d) => [[d.pose.lon, d.pose.lat], [d.trip.plan!.lon, d.trip.plan!.lat]],
+        getColor: [100, 210, 255, 170],
+        getWidth: 1.5,
         widthUnits: 'pixels',
-        currentTime: now,
-        trailLength: 24,
-        fadeTrail: true,
-        capRounded: true,
-        jointRounded: true,
-        updateTriggers: { getColor: selectedId, getWidth: selectedId },
+        getDashArray: [6, 5],
+        dashJustified: true,
+        extensions: [new PathStyleExtension({ dash: true })],
+      }),
+      new ScatterplotLayer<P>({
+        id: 'fleet-plan-dest',
+        data: plans,
+        getPosition: (d) => [d.trip.plan!.lon, d.trip.plan!.lat],
+        getRadius: 5, radiusUnits: 'pixels', filled: false, stroked: true,
+        getLineColor: [100, 210, 255, 220], getLineWidth: 1.5, lineWidthUnits: 'pixels',
+      }),
+      new TextLayer<P>({
+        id: 'fleet-plan-eta',
+        data: zoom >= 4 ? plans : [],
+        getPosition: (d) => [d.trip.plan!.lon, d.trip.plan!.lat],
+        getText: (d) => {
+          const h = distNm(d.pose.lon, d.pose.lat, d.trip.plan!.lon, d.trip.plan!.lat) / Math.max(d.pose.sog, 1)
+          return `${d.trip.plan!.name}  ETA ${h < 24 ? `${h.toFixed(0)} 小時` : `${(h / 24).toFixed(1)} 天`}`
+        },
+        getPixelOffset: [0, 14], getSize: 11, getColor: [100, 210, 255, 230],
+        fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", sans-serif',
+        characterSet: 'auto', getTextAnchor: 'middle', getAlignmentBaseline: 'top',
       }),
     )
   }

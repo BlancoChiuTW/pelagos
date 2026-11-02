@@ -161,6 +161,7 @@ export function seedFleet(g: OceanGrid, rng: Rng, now: Epoch): FleetSeed {
     const outbound = j % 2 === 0
     const [fromLon, fromLat, toLon, toLat] = outbound ? [port.lon, port.lat, target.lon, target.lat] : [target.lon, target.lat, port.lon, port.lat]
     const sogKn = range(rng, 12, 14)
+    if (j !== 0) trip.plan = { name: outbound ? `${target.vesselId.replace('PS', '藍潮 ')} 會合點` : port.name, lon: toLon, lat: toLat }
     let [lon, lat] = j === 0 ? [port.lon, port.lat] : [fromLon, fromLat]
     if (j !== 0) [lon, lat] = move(lon, lat, bearing(fromLon, fromLat, toLon, toLat), range(rng, 0, Math.max(0, distNm(fromLon, fromLat, toLon, toLat) - 24 * sogKn)))
     for (let h = 0; h <= 24; h++) {
