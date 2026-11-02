@@ -9,6 +9,11 @@ import { useOcean } from './data/useOcean'
 import { mountOceanRasters, setRasterVisible } from './layers/sst'
 import { useStore } from './store'
 import { CurrentsCanvas } from './layers/currents/CurrentsCanvas'
+import { useFleetItems, useFleetSnapshot } from './data/useFleet'
+import { useOthers } from './sim/useOthers'
+import { buildLayers } from './map/layerStack'
+import { useMapZoom } from './map/useMapZoom'
+import { useTicker } from './useTicker'
 
 export default function App() {
   const [h, setHandles] = useState<MapHandles | null>(null)
@@ -28,7 +33,21 @@ export default function App() {
     setRasterVisible(h.map, 'anomaly', showAnom, 0.8)
   }, [h, grid, showSst, showAnom])
 
-  const layers = useMemo<Layer[]>(() => [], [])
+  const layerFlags = useStore((s) => s.layers)
+  const othersCount = useStore((s) => s.othersCount)
+  const selectedId = useStore((s) => s.selectedVesselId)
+  const selectVessel = useStore((s) => s.selectVessel)
+  const now = useStore((s) => s.time.now)
+  const t = useTicker(500)
+  const zoom = useMapZoom(h?.map ?? null)
+  const snap = useFleetSnapshot(grid, now)
+  const fleet = useFleetItems(snap, t)
+  const others = useOthers(grid, othersCount, t, layerFlags.others)
+
+  const layers = useMemo<Layer[]>(
+    () => buildLayers({ layers: layerFlags, zoom, fleet, others, selectedId, onSelect: selectVessel }),
+    [layerFlags, zoom, fleet, others, selectedId, selectVessel],
+  )
   return (
     <>
       <MapView layers={layers} onReady={setHandles} />

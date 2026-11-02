@@ -18,7 +18,9 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 - T02 工作流程已寫，**等 Blanco 同意建公開 repo `pelagos` 與 push**
 - F03 完成：洋流粒子（Canvas 夾層、白色系 4 段流速、拖動暫停／放開重撒）。靜態截圖確認可見；**動態流動感未目視確認**（無頭瀏覽器跑 SwiftShader 很慢）
 - S01 完成：`sim/seed.ts`＝船舶／航次／事件／24h 船位／浮標（約 9,000），`sim/status.ts` 由船位推導狀態。單元測試用真實網格驗證「全在海上」與展示狀況
-- 下一步：F04 船隊圖層（自家船 IconLayer＋周邊船 Worker）
+- F04 完成：自家船 IconLayer（依狀態上色、依航向旋轉、可點選 → store.selectedVesselId）；周邊船 Web Worker（transfer Float32Array）＋二進位屬性點圖層。`map/layerStack.ts` 負責組 deck 圖層，`data/useFleet.ts` 依時間 t 算船姿態。**取捨**：拉遠改熱度格（ScreenGrid）疊在海溫上像棋盤，已改成 1px 淡點
+- 已知視覺問題：灰色（漂流）箭頭在黃色海溫上對比弱 → X05 光暈加深色外暈
+- 下一步：F05 FAD 浮標
 
 ## 接力規則（兩邊都必須遵守）
 

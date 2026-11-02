@@ -1,0 +1,23 @@
+// 依狀態組出 deck.gl 圖層（下 → 上，TECH_SPEC §6.2）。只在輸入變動時重組。
+import type { Layer } from '@deck.gl/core'
+import type { FleetItem } from '../data/useFleet'
+import type { OthersFrame } from '../sim/useOthers'
+import type { AppState } from '../store'
+import { createFleetLayer } from '../layers/fleet'
+import { createOthersLayer } from '../layers/others'
+
+export interface StackInput {
+  layers: AppState['layers']
+  zoom: number
+  fleet: FleetItem[]
+  others: OthersFrame | null
+  selectedId: string | null
+  onSelect: (id: string) => void
+}
+
+export function buildLayers(i: StackInput): Layer[] {
+  const out: Layer[] = []
+  if (i.layers.others && i.others) out.push(createOthersLayer(i.others, i.zoom))
+  if (i.layers.fleet && i.fleet.length) out.push(createFleetLayer(i.fleet, i.selectedId, i.onSelect))
+  return out
+}
