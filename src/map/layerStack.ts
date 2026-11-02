@@ -36,7 +36,7 @@ export function buildLayers(i: StackInput): Layer[] {
   if (i.layers.others && i.others) out.push(createOthersLayer(i.others, i.zoom))
   if (i.layers.buoys && i.buoys) out.push(createBuoyLayer(i.buoys, i.zoom))
   if (i.layers.ports && i.ports.length) out.push(...createPortLayers(i.ports, i.zoom))
-  if (i.layers.activity && i.activity.length) out.push(createActivityLayer(i.activity, i.layers.aisgap, i.zoom))
+  if (i.layers.activity && i.activity.length) out.push(...createActivityLayer(i.activity, i.layers.aisgap, i.zoom))
   if (i.imports.length) out.push(...createImportLayers(i.imports, i.zoom))
   const sel = i.fleet.find((f) => f.vessel.id === i.selectedId)
   if (sel) out.push(...createTripTrackLayers(sel.track, i.selectedEvents))
