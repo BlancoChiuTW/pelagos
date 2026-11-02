@@ -16,6 +16,10 @@ export function InfoPanel({ grid }: { grid: OceanGrid | null }) {
       <div className={s.group}>海表溫度 °C</div>
       <div style={{ height: 6, borderRadius: 3, background: SST, margin: '0 4px' }} />
       <div style={{ ...row, color: 'var(--label-2)', font: 'var(--t-caption2)' }}><span>−2</span><span>16</span><span>26</span><span>31</span></div>
+      <div className={s.group}>港口（錨形徽章）</div>
+      <div style={row}><span style={{ color: '#64d2ff' }}>● 青色</span><span style={{ color: 'var(--label-2)' }}>藍潮常用港</span></div>
+      <div style={row}><span style={{ color: '#ffb340' }}>● 琥珀</span><span style={{ color: 'var(--label-2)' }}>轉載樞紐（運搬船進港過半）</span></div>
+      <div style={row}><span style={{ color: '#d7dee6' }}>● 淡灰</span><span style={{ color: 'var(--label-2)' }}>其他港口；大小＝90 天進港次數</span></div>
       <div className={s.group}>資料來源</div>
       <div style={row}><span>海溫／異常</span><span style={{ color: 'var(--label-2)' }}>NOAA OISST · {grid ? day(grid.meta.sst.time) : '—'}</span></div>
       <div style={row}><span>洋流</span><span style={{ color: 'var(--label-2)' }}>NOAA NESDIS · {grid ? day(grid.meta.u.time) : '—'}</span></div>

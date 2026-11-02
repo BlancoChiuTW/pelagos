@@ -24,7 +24,7 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 - **可疑活動（Claude）**：`etl/fetch_events.py` → `public/data/events.json`。相遇只留運搬船／加油船×漁船（去重；30 天 35 起疑似轉載、28 起海上加油）；運搬船徘徊 ≥ 8h（242）；AIS 刻意關閉 ≥ 72h 最近 600 筆（GFW gaps 資料集本身已是刻意關閉 ≥ 12h，原本 1 萬筆是分頁上限）。`layers/activity.ts` IconLayer（橘菱＝轉載、藍菱＝加油、琥珀圈＝徘徊、紅叉＝AIS 關閉；後者預設關）。`sim/alerts.ts activityAlerts()`：同業疑似海上轉載 → 通知級（不計徽章）。只存事件位置／時間／船籍，不存船名
 - 地圖左上標語（掌握每一段航程）已依 Blanco 要求移除
 - 未做（評估後）：SAR（遠洋涵蓋率低）、船舶身分查詢與風險洞察（需後端代理 token、虛構船查不到）。EEZ 已做（見下）
-- **EEZ／PNA 入漁區（Claude）**：`etl/fetch_eez.py` 從 Marine Regions WFS（VLIZ，CC BY 4.0）抓作業範圍 EEZ 邊界線（562 條，虛線）與 PNA 會員國＋托克勞 EEZ（12 塊，去島嶼洞只留外框，淡青填色＋中文國名）→ `public/data/eez.json`（295 KB）。`layers/eez.ts` 用 MapLibre 原生圖層，圖層選單「海域」可切換；出處已加。港口依縮放篩選（拉遠只畫大港與常用港）
+- **EEZ／PNA 入漁區（Claude）**：`etl/fetch_eez.py` 從 Marine Regions WFS（VLIZ，CC BY 4.0）抓作業範圍 EEZ 邊界線（562 條，虛線）與 PNA 會員國＋托克勞 EEZ（12 塊，去島嶼洞只留外框，淡青填色＋中文國名）→ `public/data/eez.json`（295 KB）。`layers/eez.ts` 用 MapLibre 原生圖層，圖層選單「海域」可切換；出處已加。港口依縮放篩選（拉遠只畫大港與常用港）。港口改為錨形徽章（`layers/ports.ts`）：青＝藍潮常用港、琥珀＝轉載樞紐（運搬船進港過半）、灰＝其他；三級大小；圖例在「資訊」選單
 - 本機 preview 保留於 `http://localhost:4173/pelagos/`，供 Blanco 審閱新版本。尚未 push、建遠端 repo 或部署；後續先依 Blanco 的 UI 反饋迭代。
 
 - T01 完成：骨架（types／grid／DataSource／store／tokens／MapView）；冒煙測試已用無頭瀏覽器截圖確認——deck.gl 9.4＋MapLibre 6 可畫、120°E／180°／200°E 的點與海溫跨換日線連續、洋流 canvas 夾在 MapLibre 與 deck 畫布之間
