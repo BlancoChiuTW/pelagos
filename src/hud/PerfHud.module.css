@@ -1,0 +1,8 @@
+.perf { width: 300px; }
+.row { display: flex; align-items: baseline; gap: 14px; font-family: var(--font-num); }
+.fps { font-size: 26px; line-height: 1; }
+.k { font-family: var(--font-ui); font-size: 10px; color: var(--text-dim); }
+.btns { display: flex; gap: 4px; margin-top: 8px; }
+.btn { flex: 1; padding: 4px 0; border: 1px solid var(--line); background: none; color: var(--text-dim); font-family: var(--font-num); font-size: 11px; cursor: pointer; }
+.btn[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); box-shadow: inset 0 0 8px rgba(57, 213, 255, 0.25); }
+.note { margin-top: 6px; font-size: 10px; color: var(--text-dim); }

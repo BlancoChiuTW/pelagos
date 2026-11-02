@@ -19,6 +19,9 @@ import { HOUR } from './sim/geo'
 import { AnimatePresence } from 'motion/react'
 import { VesselCard } from './hud/VesselCard'
 import type { TripEvent } from './data/types'
+import { KpiWall } from './hud/KpiWall'
+import { PerfHud, useFps } from './hud/PerfHud'
+import { SourceBadge } from './hud/SourceBadge'
 
 export default function App() {
   const [h, setHandles] = useState<MapHandles | null>(null)
@@ -61,6 +64,10 @@ export default function App() {
   const flyToEvent = (e: TripEvent) => h?.map.flyTo({ center: [e.lon, e.lat], zoom: Math.max(h.map.getZoom(), 6), offset: [-180, 0], duration: 1400 })
   const buoys = useMemo(() => (snap ? buoyFrame(snap.buoys, now - 24 * HOUR, t) : null), [snap, now, t])
 
+  const fps = useFps()
+  const points = (others?.count ?? 0) + (layerFlags.buoys ? (buoys?.n ?? 0) : 0) + fleet.length
+  // 警示數暫以「訊號中斷＋油料 < 20%」計，F13 事件警示流完成後改用 alerts.ts
+  const alertCount = fleet.filter((f) => f.status === 'signal_lost' || f.trip.summary.fuelPct < 20).length
   const layers = useMemo<Layer[]>(
     () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel }),
     [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel],
@@ -70,7 +77,9 @@ export default function App() {
       <MapView layers={layers} onReady={setHandles} />
       {h && grid && <CurrentsCanvas map={h.map} canvas={h.fxCanvas} grid={grid} enabled={showCurrents} maxParticles={fxLow ? 3000 : 8000} />}
       <Hud
-        left={<LayerPanel />}
+        left={<><LayerPanel /><SourceBadge grid={grid} error={ocean.state === 'error' ? ocean.error : undefined} /></>}
+        right={snap ? <KpiWall fleet={fleet} snap={snap} alerts={alertCount} now={t} /> : undefined}
+        bottomRight={<PerfHud points={points} fps={fps} />}
         card={<AnimatePresence>{selected && grid && <VesselCard key={selected.vessel.id} item={selected} events={selectedEvents} grid={grid} onEvent={flyToEvent} />}</AnimatePresence>}
         bottomLeft={
           <>

@@ -1,7 +1,7 @@
 /* HUD 版面：全部浮在地圖上，空白處不吃滑鼠（pointer-events 只開在面板上） */
 .hud { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
 .top { position: absolute; top: 12px; left: 12px; right: 12px; }
-.left { position: absolute; top: 68px; left: 12px; width: 220px; display: flex; flex-direction: column; gap: var(--gap); }
+.left { position: absolute; top: 68px; left: 12px; width: 260px; display: flex; flex-direction: column; gap: var(--gap); }
 .right { position: absolute; top: 68px; right: 12px; bottom: 96px; width: 320px; display: flex; flex-direction: column; gap: var(--gap); }
 .card { position: absolute; top: 68px; right: 344px; width: 340px; bottom: 96px; display: flex; flex-direction: column; }
 .card:empty { display: none; }

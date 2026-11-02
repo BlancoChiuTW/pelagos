@@ -32,7 +32,7 @@ export function useFleetItems(snap: FleetSnapshot | null, t: Epoch): FleetItem[]
       const seen = track.filter((p) => p.at <= t)
       const pose = poseAt(seen.length ? seen : track, t)
       if (!pose || !trip) continue
-      out.push({ vessel, trip, track, pose, status: statusOf(seen, t) })
+      out.push({ vessel, trip, track, pose, status: statusOf(seen, t, vessel.type) })
     }
     return out
   }, [snap, tracks, t])
