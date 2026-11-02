@@ -15,9 +15,9 @@
 - [x] F03 (57cc82d) 洋流粒子動畫
 - [x] S01 (eba3a6b) 模擬資料：`src/sim/seed.ts` 照 PRD §4 產生 Vessel／Trip／Event／Position／Buoy（固定種子、只在海上）
 - [x] F04 (cbfd613) 船隊圖層（自家 36 艘＋周邊 Worker 模擬）
-- [~] Claude 20:00 F05 FAD 浮標圖層
-- [ ] F06 船隻詳情卡
-- [ ] F07 航次時間軸（病程）＋本航次軌跡
+- [x] F05 (c016a18) FAD 浮標圖層
+- [~] Claude 20:15 F06 船隻詳情卡
+- [~] Claude 20:15 F07 航次時間軸（病程）＋本航次軌跡
 - [ ] F08 KPI 牆
 - [ ] F09 效能 HUD＋數量切換（標「壓力測試」）
 - [ ] F10 資料來源與時間標示
