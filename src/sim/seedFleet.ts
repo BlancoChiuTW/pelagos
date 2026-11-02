@@ -54,6 +54,9 @@ export function seedFleet(g: OceanGrid, rng: Rng, now: Epoch): FleetSeed {
     events.push({ id: `E${++eid}`, tripId: trip.id, vesselId: trip.vesselId, at, type, lon, lat, detail })
   const start24 = now - 24 * HOUR
   const pohnpei = TRANSSHIP_PORTS[0]
+  // 同港兩艘船錯開泊位，否則圖示與名牌完全重疊（藍潮運 1／藍潮 106）
+  const berthW: [number, number] = [pohnpei.lon - 0.05, pohnpei.lat + 0.02]
+  const berthE: [number, number] = [pohnpei.lon + 0.05, pohnpei.lat - 0.02]
 
   // ── 圍網船 ──
   for (let i = 0; i < SEINERS; i++) {
@@ -103,7 +106,7 @@ export function seedFleet(g: OceanGrid, rng: Rng, now: Epoch): FleetSeed {
     // 過去 24h：每小時一筆船位，作息依當地時間（白天搜魚、清晨下網、夜間漂流）
     let heading = rng() * 360
     let setToday = false
-    if (inPort) [lon, lat] = [pohnpei.lon, pohnpei.lat]
+    if (inPort) [lon, lat] = berthW
     const lostAt = i === SHOWCASE.signalLost[0] ? now - 3 * HOUR : i === SHOWCASE.signalLost[1] ? now - 5 * HOUR : Infinity
     for (let h = 0; h <= 24; h++) {
       const t = start24 + h * HOUR
@@ -162,7 +165,7 @@ export function seedFleet(g: OceanGrid, rng: Rng, now: Epoch): FleetSeed {
     const [fromLon, fromLat, toLon, toLat] = outbound ? [port.lon, port.lat, target.lon, target.lat] : [target.lon, target.lat, port.lon, port.lat]
     const sogKn = range(rng, 12, 14)
     if (j !== 0) trip.plan = { name: outbound ? `${target.vesselId.replace('PS', '藍潮 ')} 會合點` : port.name, lon: toLon, lat: toLat }
-    let [lon, lat] = j === 0 ? [port.lon, port.lat] : [fromLon, fromLat]
+    let [lon, lat] = j === 0 ? berthE : [fromLon, fromLat]
     if (j !== 0) [lon, lat] = move(lon, lat, bearing(fromLon, fromLat, toLon, toLat), range(rng, 0, Math.max(0, distNm(fromLon, fromLat, toLon, toLat) - 24 * sogKn)))
     for (let h = 0; h <= 24; h++) {
       const t = start24 + h * HOUR

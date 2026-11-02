@@ -1,4 +1,5 @@
-// 時間軸（F12）：拖動回放過去 24 小時；播放 1／10／60 分鐘每秒；「即時」回到現在
+// 回放（F12）：平時收起；從工具列「回放」或詳情卡「回放航跡」展開。拖動回放過去 24 小時，播放 1／10／60 分鐘每秒
+// 實務用途：事後調查（訊號中斷前往哪開、哪裡下網、越界爭議），不是常駐看板元素
 import { useEffect } from 'react'
 import { HOUR } from '../sim/geo'
 import { fmtTime } from '../sim/labels'
@@ -49,6 +50,9 @@ export function TimeBar({ live }: { live: number }) {
       </div>
       <button className={s.speed} onClick={() => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length])}>{speed} 分/秒</button>
       <button className={s.live} aria-pressed={scrub === null} onClick={() => { pause(); setScrub(null) }}>即時</button>
+      <button className={s.play} aria-label="關閉回放" onClick={() => { pause(); setScrub(null); useStore.getState().setReplayOpen(false) }}>
+        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 2l8 8M10 2 2 10" stroke="currentColor" strokeWidth="1.6" /></svg>
+      </button>
     </Panel>
   )
 }

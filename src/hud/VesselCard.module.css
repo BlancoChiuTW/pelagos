@@ -12,3 +12,5 @@
 .sep { height: 1px; background: var(--line); }
 .fuel { height: 4px; border-radius: 2px; overflow: hidden; background: var(--fill); margin-top: 6px; }
 .fuel > div { height: 100%; }
+.replay { height: 34px; border: 0; border-radius: 9px; background: var(--fill); color: var(--tint); font: 600 15px/20px var(--font-ui); cursor: pointer; }
+.replay:hover { background: rgba(120,120,128,.36); }

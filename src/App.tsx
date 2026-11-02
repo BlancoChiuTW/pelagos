@@ -24,6 +24,7 @@ import { KpiWall } from './hud/KpiWall'
 import { VesselCard } from './hud/VesselCard'
 import { PerfHud, useFps } from './hud/PerfHud'
 import { TimeBar } from './hud/TimeBar'
+import { FleetList } from './hud/FleetList'
 import { BootSequence } from './hud/BootSequence'
 import { Placeholder } from './pages/Placeholder'
 import { Vessels } from './pages/Vessels'
@@ -75,6 +76,7 @@ export default function App() {
 
   const live = useTicker(500)
   const scrub = useStore((s) => s.scrub)
+  const replayOpen = useStore((s) => s.replayOpen)
   const t = scrub ?? live // 回放時用回放時間（F12）
   const zoom = useMapZoom(h?.map ?? null)
   const snap = useFleetSnapshot(grid, now)
@@ -150,11 +152,14 @@ export default function App() {
               {selected && grid ? (
                 <VesselCard key={selected.vessel.id} item={selected} events={selectedEvents} grid={grid} onEvent={flyToEvent} />
               ) : snap ? (
-                <KpiWall key="kpi" fleet={fleet} snap={snap} alerts={alertCount} now={t} />
+                <div key="overview" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gap)', minHeight: 0, flex: 1 }}>
+                  <KpiWall fleet={fleet} snap={snap} alerts={alertCount} now={t} />
+                  <FleetList fleet={fleet} />
+                </div>
               ) : null}
             </AnimatePresence>
           }
-          bottom={<TimeBar live={live} />}
+          bottom={replayOpen || scrub !== null ? <TimeBar live={live} /> : undefined}
           bottomLeft={demoMode ? <PerfHud points={points} fps={fps} /> : undefined}
         />
       </div>

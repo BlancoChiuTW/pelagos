@@ -25,6 +25,9 @@ export interface AppState {
   /** 回放中的時間；null＝即時（F12） */
   scrub: Epoch | null
   setScrub: (t: Epoch | null) => void
+  /** 回放列是否展開（平時收起，需要調查時才開） */
+  replayOpen: boolean
+  setReplayOpen: (on: boolean) => void
   online: boolean
   intro: 'pending' | 'playing' | 'done'
   /** 開機序列進度：0 全暗 → 1 海溫 → 2 洋流 → 3 浮標 → 4 船隊 → 5 HUD（X01） */
@@ -59,6 +62,8 @@ export const useStore = create<AppState>()((set) => ({
   time: { now: loadNow, cursor: loadNow, playing: false, speed: 10 },
   online: typeof navigator === 'undefined' ? true : navigator.onLine,
   scrub: null,
+  replayOpen: false,
+  setReplayOpen: (replayOpen) => set({ replayOpen }),
   setScrub: (scrub) => set({ scrub }),
   intro: 'pending',
   introStage: 0,

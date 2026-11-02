@@ -26,6 +26,8 @@ function Popover({ label, icon, children }: { label: string; icon: ReactNode; ch
 export function Toolbar({ fleet, layers, info }: { fleet: FleetItem[]; layers: ReactNode; info: ReactNode }) {
   const [q, setQ] = useState('')
   const select = useStore((st) => st.selectVessel)
+  const replayOpen = useStore((st) => st.replayOpen)
+  const setReplay = useStore((st) => st.setReplayOpen)
   const hits = q.trim() ? fleet.filter((f) => f.vessel.name.includes(q.trim()) || f.vessel.id.toLowerCase().includes(q.trim().toLowerCase())).slice(0, 8) : []
   return (
     <div className={s.bar}>
@@ -46,6 +48,7 @@ export function Toolbar({ fleet, layers, info }: { fleet: FleetItem[]; layers: R
       </div>
       <Popover label="圖層" icon={Icon.layers}>{layers}</Popover>
       <Popover label="資訊" icon={Icon.info}>{info}</Popover>
+      <button className={`${s.glass} ${s.btn}`} aria-expanded={replayOpen} onClick={() => setReplay(!replayOpen)}>{Icon.replay}回放</button>
     </div>
   )
 }

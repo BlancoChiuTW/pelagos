@@ -149,6 +149,7 @@ export function createFleetLayers({ items, selectedId, zoom, showTrails, trackSt
   )
   const labeled = zoom >= 4.5 ? items : items.filter((d) => d.vessel.id === selectedId)
   out.push(
+    // 註：試過 CollisionFilterExtension 做名牌避讓，結果名牌全部被濾掉，已拿掉；同港疊字改由 seedFleet 錯開泊位解決
     new TextLayer<FleetItem>({
       id: 'fleet-labels',
       data: labeled,

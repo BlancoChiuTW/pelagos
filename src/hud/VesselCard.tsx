@@ -62,6 +62,7 @@ export function VesselCard({ item, events, grid, onEvent }: Props) {
             <div className={s.fuel}><div style={{ width: `${fuel}%`, background: fuelVar }} /></div>
           </div>
         </div>
+        <button className={s.replay} onClick={() => { const st = useStore.getState(); st.setReplayOpen(true); st.setScrub(st.time.now - 24 * 3_600_000); st.play() }}>回放這艘船過去 24 小時航跡</button>
         <div className={s.sep} />
         <TripTimeline events={events} onEvent={onEvent} />
       </Panel>

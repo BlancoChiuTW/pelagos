@@ -10,5 +10,6 @@ export const Icon = {
   layers: <svg viewBox="0 0 24 24" width="18" height="18"><path {...P} d="M12 4 3 8.5l9 4.5 9-4.5L12 4zM3 12.5 12 17l9-4.5M3 16.5 12 21l9-4.5" /></svg>,
   info: <svg viewBox="0 0 24 24" width="18" height="18"><circle {...P} cx="12" cy="12" r="8.5" /><path {...P} d="M12 11v5.5M12 7.8v.2" /></svg>,
   search: <svg viewBox="0 0 24 24" width="16" height="16"><circle {...P} cx="10.5" cy="10.5" r="6" /><path {...P} d="m15 15 5 5" /></svg>,
+  replay: <svg viewBox="0 0 24 24" width="18" height="18"><path {...P} d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5M12 8v4l3 2" /></svg>,
   close: <svg viewBox="0 0 24 24" width="16" height="16"><path {...P} d="M6 6l12 12M18 6 6 18" /></svg>,
 }
