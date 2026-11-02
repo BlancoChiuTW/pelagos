@@ -14,6 +14,8 @@ import { useOthers } from './sim/useOthers'
 import { buildLayers } from './map/layerStack'
 import { useMapZoom } from './map/useMapZoom'
 import { useTicker } from './useTicker'
+import { buoyFrame } from './layers/buoys'
+import { HOUR } from './sim/geo'
 
 export default function App() {
   const [h, setHandles] = useState<MapHandles | null>(null)
@@ -43,10 +45,11 @@ export default function App() {
   const snap = useFleetSnapshot(grid, now)
   const fleet = useFleetItems(snap, t)
   const others = useOthers(grid, othersCount, t, layerFlags.others)
+  const buoys = useMemo(() => (snap ? buoyFrame(snap.buoys, now - 24 * HOUR, t) : null), [snap, now, t])
 
   const layers = useMemo<Layer[]>(
-    () => buildLayers({ layers: layerFlags, zoom, fleet, others, selectedId, onSelect: selectVessel }),
-    [layerFlags, zoom, fleet, others, selectedId, selectVessel],
+    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, onSelect: selectVessel }),
+    [layerFlags, zoom, fleet, others, buoys, selectedId, selectVessel],
   )
   return (
     <>

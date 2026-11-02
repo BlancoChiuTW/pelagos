@@ -5,12 +5,14 @@ import type { OthersFrame } from '../sim/useOthers'
 import type { AppState } from '../store'
 import { createFleetLayer } from '../layers/fleet'
 import { createOthersLayer } from '../layers/others'
+import { createBuoyLayer, type BuoyFrame } from '../layers/buoys'
 
 export interface StackInput {
   layers: AppState['layers']
   zoom: number
   fleet: FleetItem[]
   others: OthersFrame | null
+  buoys: BuoyFrame | null
   selectedId: string | null
   onSelect: (id: string) => void
 }
@@ -18,6 +20,7 @@ export interface StackInput {
 export function buildLayers(i: StackInput): Layer[] {
   const out: Layer[] = []
   if (i.layers.others && i.others) out.push(createOthersLayer(i.others, i.zoom))
+  if (i.layers.buoys && i.buoys) out.push(createBuoyLayer(i.buoys, i.zoom))
   if (i.layers.fleet && i.fleet.length) out.push(createFleetLayer(i.fleet, i.selectedId, i.onSelect))
   return out
 }

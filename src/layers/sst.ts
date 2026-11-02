@@ -47,7 +47,7 @@ export function mountOceanRasters(map: maplibregl.Map, grid: GridMeta) {
 }
 
 /** 開關用透明度補間，不用 visibility（才有淡入淡出） */
-export function setRasterVisible(map: maplibregl.Map, key: RasterKey, on: boolean, opacity = 0.7) {
+export function setRasterVisible(map: maplibregl.Map, key: RasterKey, on: boolean, opacity = 0.6) {
   const id = `pelagos-${key}`
   if (map.getLayer(id)) map.setPaintProperty(id, 'raster-opacity', on ? opacity : 0)
 }

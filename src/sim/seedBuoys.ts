@@ -21,7 +21,7 @@ export function seedBuoys(grid: OceanGrid, rng: Rng, owners: { vesselId: string;
       let lon = o.lon
       let lat = o.lat
       for (let t = 0; t < 12; t++) {
-        const r = 2.8 * Math.sqrt(rng()) // 約 300 km 內
+        const r = Math.min(3.2, 1.1 * Math.sqrt(-2 * Math.log(1 - rng() * 0.999))) // 高斯（Rayleigh 半徑），邊緣自然散開
         const a = rng() * Math.PI * 2
         lon = o.lon + (r * Math.cos(a)) / Math.cos((o.lat * Math.PI) / 180)
         lat = o.lat + r * Math.sin(a)
