@@ -7,7 +7,7 @@
 ## M0 基礎（P0 前置）
 - [x] T00 (b6262e9) ETL 改版（TECH_SPEC §3）：範圍 100°E→210°E、20°S→45°N，跨換日線分兩段抓再 +360 接上；加抓 anom；輸出改二進位 `ocean.json`＋`*.i16`＋`sst.png`／`anom.png`；刪舊的 sst.json／currents.json；`scripts/verify.sh` 的資料檔清單同步改
 - [x] T01 (5af3e24) 專案骨架（TECH_SPEC §1、§2、§5、§9）：裝 zustand、vitest、@fontsource/jetbrains-mono、motion、gsap、@luma.gl/effects；建 types／DataSource／grid／store／tokens／MapView；**先做冒煙測試**（MapboxOverlay＋maplibre 6 能畫點、200°E 的點不斷裂、洋流 canvas 插在中間）；verify 加 `vitest run`；刪 Vite 範例
-- [~] T02 (10fbc7c 工作流程已寫；等 Blanco 同意建公開 repo 與 push) GitHub Pages 部署：`vite.config.ts` 設 base；`.github/workflows/deploy.yml`。**建立公開 repo 與 push 要等 Blanco 同意**
+- [x] T02 部署：GitHub Pages https://blancochiutw.github.io/pelagos/（GFW_TOKEN secret 待 Blanco 設）
 
 ## M1 P0（目標 11/02 22:00）
 - [x] F01 (2151478) HUD 版面與換日線連續

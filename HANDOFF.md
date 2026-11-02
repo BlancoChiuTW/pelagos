@@ -11,6 +11,8 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 
 ## 現況
 
+- **已部署（2026-11-02 22:15）**：https://blancochiutw.github.io/pelagos/ （repo：https://github.com/BlancoChiuTW/pelagos，公開）。push main 自動部署；每日 06:00 排程更新 NOAA，有 `GFW_TOKEN` secret 才更新 GFW。**GitHub Secret `GFW_TOKEN` 尚未設定**（自動化權限擋下寫入 secret，需 Blanco 自己設）
+
 - **最新 V04（bb19122，Codex）**：Blanco 授權閱讀專案與 Obsidian 脈絡後，基於現有版本直接改進美觀、簡潔度及互動。延續六模組與資料模型，沒有將需求假設視為已確認的業務工作流。先看 TECH_SPEC §19.6。
 - V04 視覺：深藍／青綠 token、品牌側欄、六頁共用頂欄、重整 KPI 與船隊清單、管理表格及詳情面板；海溫透明度 0.30，管理頁隱藏但不卸載地圖。1250px 以下側欄收成圖示，950px 以下管理頁上下排列；桌面驗收，未宣稱完成手機版。
 - V04 互動：Ctrl／⌘ K 搜尋、上下鍵與 Enter 選船、空結果提示、Escape／外點關閉選單；地圖詳情直達航次／主檔並共用選船；新增縮放／總覽復位；航次補登按需展開，錯誤與成功回饋、防重複點擊；表格排序、航次事件與資料來源卡可鍵盤操作。熱區未實作，開關改標「規劃中」並停用。
@@ -60,7 +62,7 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 2. **做完一項**：`npm run verify` 必須通過 → TASKS.md 改 `[x]` 並附 commit 短碼 → `git commit -m "[任務ID] 摘要"` → 更新本檔「現況」→ `./scripts/sync-vault.sh`（同步給 Blanco 的 Obsidian）。
 3. **額度快用完／要停手**：不管做到哪，立刻 `git commit -m "[任務ID] WIP: 做到哪"`，並在本檔「現況」寫清楚：做到哪、下一步是什麼、哪裡有坑。**沒寫交接就停手，等於這段白做。**
 4. **不擴大範圍**：PRD 沒寫的功能不做；覺得 PRD 有問題，寫在「待 Blanco 決定」。
-5. **不推送**：`git push`、建立 GitHub repo、部署，一律等 Blanco 說可以。
+5. **推送**：repo 已建、Blanco 已同意部署。push main 會直接上線，**明天 10:00 凍結後只推修錯**；推之前 `npm run verify` 必須綠。
 6. **省額度**：
    - 不要讀 `public/data/*.json`（很大），要知道格式看本檔「資料格式」
    - 不要讀 `node_modules/`、`package-lock.json`
