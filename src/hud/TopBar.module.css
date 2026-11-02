@@ -1,0 +1,15 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 44px;
+  padding: 0 14px;
+}
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.logo { font-family: var(--font-num); font-weight: 600; font-size: 17px; letter-spacing: 0.32em; color: var(--accent); }
+.sub { font-size: 12px; color: var(--text-dim); letter-spacing: 0.06em; }
+.spacer { flex: 1; }
+.item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-dim); }
+.clock { font-family: var(--font-num); font-size: 13px; color: var(--text); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+.dot[data-off='true'] { background: var(--alert); box-shadow: 0 0 8px var(--alert); }
