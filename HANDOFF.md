@@ -12,9 +12,9 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 ## 現況
 
 - 已有：Vite + React 19 + TS 骨架（仍是範例頁）、maplibre-gl 與 deck.gl 9 套件已裝
-- 已有：`etl/fetch_ocean.py` 抓好 NOAA 海溫（2026-10-17）與地轉流（2026-09-28），輸出在 `public/data/`。目前範圍只到東經 180°，T00 要擴大
+- T00 完成：`public/data/` 已是 TECH_SPEC §3.3 的二進位格式，範圍 100°E–210°E（跨換日線無接縫，已目視 sst.png）。海溫／異常 2026-10-17，洋流 2026-09-28；網格 220×130、陸地 14%
 - PRD v2：核心資料模型是「船 → 航次 → 事件」（PRD §4），模擬資料照它產生
-- 下一步：TASKS.md 的 T00
+- 下一步：TASKS.md 的 T01（先做冒煙測試）
 
 ## 接力規則（兩邊都必須遵守）
 
@@ -56,13 +56,13 @@ docs/PRD.md     規格
 
 ## 資料格式
 
-以 `docs/TECH_SPEC.md` §3.3 為準（二進位 Int16＋ocean.json）。T00 完成前 `public/data/` 還是舊的 JSON 格式（sst.json、currents.json，範圍只到 180°E），不要拿來寫新功能。
+以 `docs/TECH_SPEC.md` §3.3 為準：`ocean.json`（中繼資料）＋`sst/anom/u/v.i16`（Int16 LE，×scale 還原，−32768＝陸地）＋`sst.png`／`anom.png`（北在上、陸地透明）。
 
 ## 陷阱
 
 - **換日線**：作業海域跨東經 180°。內部經度一律用 0–360（例如西經 150° = 210）；MapLibre 能吃超過 180 的經度，deck.gl 圖層也一樣。不要在 −180/180 處切資料。
 - **赤道地轉流**：地轉流在赤道附近不成立，ETL 已把 |緯度| < 3° 設為 0，粒子在那裡會停住，這是正常的。
-- **ERDDAP 偶爾 503**：ETL 有重試與 `etl/raw/` 快取；要重抓就刪 `etl/raw/`。
+- **ERDDAP 偶爾 503 或暫時 404（Currently unknown datasetID）**：ETL 對兩者都會重試，並快取在 `etl/raw/`；要重抓就刪 `etl/raw/`。`ncdcOisst21Agg_LonPM180` 曾整個消失，所以改用 0–360 的 `ncdcOisst21Agg`。
 - **NOAA 洋流資料比海溫舊**（9/28 vs 10/17）：畫面上分開標示資料時間，不要寫成同一天。
 
 ## 待 Blanco 決定
