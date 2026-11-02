@@ -35,8 +35,8 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 - 驗證：21 個單元測試；每頁都截圖看過
 - **剩下**：T02 部署（等 Blanco 同意建公開 repo）、README 技術決策（F18）、展示腳本彩排；X 特效系列已降為 P2
 - **全球版**（TECH_SPEC §19.5）：海溫／異常／洋流全球 0.5°、經度 360° 相接（`GridMeta.wrap`）；陸地 NE 50m 全球
-- 進行中：資料串接的三個介面（VMS＝NAF、浮標＝兩家廠商格式、電子漁獲日誌＝FLUX XML），格式與解析在 `data/interfaces/formats.ts`（已有測試），UI 待做
-- 下一步：介面 UI → F18 README
+- 資料串接三個介面完成（`pages/InterfaceConsole.tsx`＋`DataHub.tsx`）：點連線卡切換主控台；VMS（NAF 報文，持續接收）、浮標平台（A 廠 JSON／B 廠分號 CSV 交替，正規化）、電子漁獲日誌（FLUX XML，「接收一筆」→ 解析成功寫入下網事件）。約 1/10 訊息刻意損壞，展示驗證失敗。NOAA 卡片顯示 ETL 管線圖。已截圖確認 VMS 與電子漁獲日誌寫入
+- 下一步：F18 README（架構圖、技術決策、資料模型、參考開源）→ 部署（等 Blanco）
 
 ## 接力規則（兩邊都必須遵守）
 

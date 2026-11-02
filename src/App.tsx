@@ -143,7 +143,7 @@ export default function App() {
           page={onMap ? undefined : view === 'vessels' ? <Vessels fleet={fleet} now={t} /> : view === 'trips' && snap ? <Trips fleet={fleet} snap={snap} now={t} onEvent={goEvent} />
               : view === 'alerts' ? <Alerts alerts={alerts} onLocate={locateAlert} />
               : view === 'buoys' && snap ? <Buoys snap={snap} fleet={fleet} trackStart={trackStart} now={t} onGo={goBuoy} />
-              : view === 'data' ? <DataHub grid={grid} snap={snap} now={t} />
+              : view === 'data' ? <DataHub grid={grid} snap={snap} now={t} fleet={fleet} trackStart={trackStart} />
               : <Placeholder view={view} />}
           right={
             <AnimatePresence mode="wait">

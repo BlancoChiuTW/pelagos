@@ -29,10 +29,12 @@ if (process.env.WHEEL) {
 }
 for (const [env, act] of [['MOUSE', 'move'], ['CLICK', 'click']]) {
   if (!process.env[env]) continue
-  const [x, y] = process.env[env].split(',').map(Number)
-  await page.mouse.move(x, y)
-  if (act === 'click') await page.mouse.click(x, y)
-  await page.waitForTimeout(Number(process.env.AFTER ?? 1800))
+  for (const pt of process.env[env].split(';')) { // 多點用分號：CLICK="47,390;900,200"
+    const [x, y] = pt.split(',').map(Number)
+    await page.mouse.move(x, y)
+    if (act === 'click') await page.mouse.click(x, y)
+    await page.waitForTimeout(Number(process.env.AFTER ?? 1800))
+  }
 }
 await page.screenshot({ path: out })
 const info = await page.evaluate(() =>
