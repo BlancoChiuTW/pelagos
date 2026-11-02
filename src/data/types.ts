@@ -124,3 +124,18 @@ export interface FishingEffort {
   /** [lon(0–360), lat, hours, gearIndex, vessels] */
   cells: [number, number, number, number, number][]
 }
+
+/** 港口與停靠站（GFW 進港事件，依錨地彙整；etl/fetch_ports.py） */
+export interface Port {
+  name: string
+  country: string
+  lat: Lat
+  lon: Lon
+  visits: number
+  fishing: number
+  carrier: number
+  vessels: number
+  topFlags: [string, number][]
+  medianHrs: number | null
+}
+export interface PortStats { mode: 'live' | 'mock'; dataset: string; dateRange: [string, string]; source: string; ports: Port[] }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { dataSource } from './DataSource'
-import type { FishingEffort, OceanGrid } from './types'
+import type { FishingEffort, OceanGrid, PortStats } from './types'
 
 export type Loadable<T> = { state: 'loading' } | { state: 'ok'; data: T } | { state: 'error'; error: string }
 
@@ -25,6 +25,14 @@ export function useFishingEffort(): FishingEffort | null {
   const [v, setV] = useState<FishingEffort | null>(null)
   useEffect(() => {
     dataSource.loadFishingEffort().then(setV).catch(() => setV(null))
+  }, [])
+  return v
+}
+
+export function usePorts(): PortStats | null {
+  const [v, setV] = useState<PortStats | null>(null)
+  useEffect(() => {
+    dataSource.loadPorts().then(setV).catch(() => setV(null))
   }, [])
   return v
 }

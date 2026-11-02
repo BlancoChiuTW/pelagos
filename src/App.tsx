@@ -4,9 +4,9 @@ import { AnimatePresence } from 'motion/react'
 import { MapView, type MapHandles } from './map/MapView'
 import { buildLayers } from './map/layerStack'
 import { useMapZoom } from './map/useMapZoom'
-import { useFishingEffort, useOcean } from './data/useOcean'
+import { useFishingEffort, useOcean, usePorts } from './data/useOcean'
 import { useFleetItems, useFleetSnapshot, type FleetItem } from './data/useFleet'
-import type { TripEvent } from './data/types'
+import type { Port, TripEvent } from './data/types'
 import { mountOceanRasters, setRasterVisible } from './layers/sst'
 import { showGfw } from './layers/gfwRaster'
 import { CurrentsCanvas } from './layers/currents/CurrentsCanvas'
@@ -40,6 +40,11 @@ import type { Alert } from './data/types'
 
 // 滑過船隻的小卡（V02）
 const tooltip = (info: PickingInfo) => {
+  const port = info.object as Port | undefined
+  if (port && 'visits' in port) {
+    const flags = port.topFlags.map(([f, n]) => `${f} ${n}`).join('、')
+    return { html: `<b>${port.name}</b>（${port.country}）<br/>90 天進港 ${port.visits} 次・${port.vessels} 艘船<br/>漁船 ${port.fishing}・運搬船 ${port.carrier}<br/>主要船籍：${flags || '—'}${port.medianHrs != null ? `<br/>停靠中位數 ${port.medianHrs} 小時` : ''}<br/><span style="opacity:.6">資料：Global Fishing Watch</span>` }
+  }
   const d = info.object as FleetItem | undefined
   if (!d || !d.vessel) return null
   return { html: `<b>${d.vessel.name}</b><br/>${STATUS_LABEL[d.status]} · ${d.pose.sog.toFixed(1)} kn · ${d.pose.cog}°` }
@@ -49,6 +54,8 @@ export default function App() {
   const [h, setHandles] = useState<MapHandles | null>(null)
   const ocean = useOcean()
   const gfw = useFishingEffort()
+  const portStats = usePorts()
+  const ports = useMemo(() => portStats?.ports ?? [], [portStats])
   const gfwGear = useStore((s) => s.gfwGear)
   const grid = ocean.state === 'ok' ? ocean.data : null
   const rawFlags = useStore((s) => s.layers)
@@ -65,7 +72,7 @@ export default function App() {
 
   // 開機序列：依進度逐層點亮（X01）
   const layerFlags = useMemo(
-    () => ({ ...rawFlags, buoys: rawFlags.buoys && stage >= 3, others: rawFlags.others && stage >= 4, gfw: rawFlags.gfw && stage >= 3, fleet: rawFlags.fleet && stage >= 4, track: rawFlags.track && stage >= 4 }),
+    () => ({ ...rawFlags, buoys: rawFlags.buoys && stage >= 3, others: rawFlags.others && stage >= 4, gfw: rawFlags.gfw && stage >= 3, ports: rawFlags.ports && stage >= 3, fleet: rawFlags.fleet && stage >= 4, track: rawFlags.track && stage >= 4 }),
     [rawFlags, stage],
   )
 
@@ -133,8 +140,8 @@ export default function App() {
   }
 
   const layers = useMemo<Layer[]>(
-    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t, imports }),
-    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t, imports],
+    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t, imports, ports }),
+    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t, imports, ports],
   )
   const introDone = useCallback(() => setIntro('done'), [setIntro])
   const bootSteps = [
