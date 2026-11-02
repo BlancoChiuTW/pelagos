@@ -20,7 +20,7 @@ export function InfoPanel({ grid }: { grid: OceanGrid | null }) {
       <div style={row}><span style={{ color: '#64d2ff' }}>● 青色</span><span style={{ color: 'var(--label-2)' }}>藍潮常用港</span></div>
       <div style={row}><span style={{ color: '#ffb340' }}>● 琥珀</span><span style={{ color: 'var(--label-2)' }}>轉載樞紐（運搬船進港過半）</span></div>
       <div style={row}><span style={{ color: '#d7dee6' }}>● 淡灰</span><span style={{ color: 'var(--label-2)' }}>其他港口；大小＝90 天進港次數</span></div>
-      <div className={s.group}>可疑活動（徽章）</div>
+      <div className={s.group}>可疑活動（標記針）</div>
       <div style={row}><span style={{ color: '#ff9f0a' }}>● 兩船並排</span><span style={{ color: 'var(--label-2)' }}>運搬船×漁船相遇（疑似海上轉載）</span></div>
       <div style={row}><span style={{ color: '#64d2ff' }}>● 油滴</span><span style={{ color: 'var(--label-2)' }}>加油船×漁船（海上補給）</span></div>
       <div style={row}><span style={{ color: '#ffcc66' }}>● 繞圈</span><span style={{ color: 'var(--label-2)' }}>運搬船徘徊 ≥ 8 小時</span></div>

@@ -11,3 +11,16 @@
 .hint { margin-top: 28px; font-size: 10px; color: var(--text-dim); opacity: 0.6; }
 .cursor { display: inline-block; width: 0.55em; height: 1em; background: var(--accent); vertical-align: -0.1em; margin-left: 4px; animation: blink 1s steps(2) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
+
+/* logo 逐筆描繪（OS 開機感） */
+.emblem { display: block; width: 76px; height: 76px; margin: 0 0 22px; color: var(--accent); overflow: visible; animation: glow 0.8s ease-out 1.1s forwards; }
+.stroke { stroke: currentColor; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 0.7s cubic-bezier(.6,0,.3,1) forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes glow { to { filter: drop-shadow(0 0 6px rgba(57, 213, 255, 0.75)) drop-shadow(0 0 16px rgba(57, 213, 255, 0.35)); } }
+/* 開機進度條：就緒一項推進一段；未完成時掃描光帶 */
+.progress { position: relative; height: 2px; margin-top: 18px; background: rgba(255, 255, 255, 0.08); border-radius: 1px; overflow: hidden; }
+.progress > i { position: absolute; inset: 0 auto 0 0; background: var(--accent); box-shadow: 0 0 8px var(--accent); transition: width 0.3s ease-out; }
+.progress::after { content: ''; position: absolute; top: 0; bottom: 0; width: 30%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent); animation: scan 1.1s linear infinite; }
+.progress[data-done='true']::after { display: none; }
+@keyframes scan { from { left: -30%; } to { left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .stroke { animation: none; stroke-dashoffset: 0; } .emblem { animation: none; } .progress::after { animation: none; } }

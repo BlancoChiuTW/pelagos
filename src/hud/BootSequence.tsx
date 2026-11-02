@@ -42,7 +42,8 @@ export function BootSequence({ map, steps, onDone }: { map: maplibregl.Map | nul
   // 第一段：逐字打字
   useEffect(() => {
     const p = { a: 0, b: 0 }
-    const t = gsap.timeline({ onComplete: () => setTyped(true) })
+    // 等 logo 一筆一畫畫完（約 1.1 秒）才開始打字
+    const t = gsap.timeline({ delay: 1.1, onComplete: () => setTyped(true) })
     t.to(p, { a: TITLE.length, duration: 0.45, ease: 'none', onUpdate: () => setTitle(TITLE.slice(0, Math.round(p.a))) })
     t.to(p, { b: SUB.length, duration: 0.35, ease: 'none', onUpdate: () => setSub(SUB.slice(0, Math.round(p.b))) })
     return () => {
@@ -75,13 +76,24 @@ export function BootSequence({ map, steps, onDone }: { map: maplibregl.Map | nul
   return (
     <div ref={overlay} className={s.overlay}>
       <div className={s.box}>
-        <div className={s.logo}>{title}{!typed && <span className={s.cursor} />}</div>
+        {/* logo 逐筆描繪：外圈 → 船首 → 波浪，畫完亮起光暈（pathLength=1 讓 dash 動畫與路徑長度無關） */}
+        <svg className={s.emblem} viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <circle className={s.stroke} style={{ animationDelay: '0s' }} cx="13" cy="13" r="12" pathLength="1" transform="rotate(-90 13 13)" />
+          <path className={s.stroke} style={{ animationDelay: '0.35s' }} d="M4 16 13 4l9 12-9-4-9 4Z" pathLength="1" />
+          <path className={s.stroke} style={{ animationDelay: '0.75s' }} d="m4 21 9-4 9 4" pathLength="1" />
+        </svg>
+        <div className={s.logo}>{title}{!typed && title && <span className={s.cursor} />}</div>
         <div className={s.sub}>{sub}</div>
         <div className={s.lines}>
           {steps.slice(0, shown).map((x) => (
             <div key={x.label} className={s.line} data-ok={x.ok}><Mark ok={x.ok} />{x.label}{x.ok ? ' 已就緒' : ' 載入中'}</div>
           ))}
         </div>
+        {typed && (
+          <div className={s.progress} data-done={ready && shown >= steps.length}>
+            <i style={{ width: `${(steps.slice(0, shown).filter((x) => x.ok).length / steps.length) * 100}%` }} />
+          </div>
+        )}
         {typed && <div className={s.hint}>{ready ? '按任意鍵略過' : '資料載入中…'}</div>}
       </div>
     </div>
