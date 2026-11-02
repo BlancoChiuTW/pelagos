@@ -4,4 +4,4 @@
 .right > * { pointer-events: auto; }
 .bottom { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(560px, calc(100vw - 560px)); }
 .bottomLeft { position: absolute; left: 96px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
-.page { position: absolute; top: 12px; left: 96px; right: 12px; bottom: 12px; pointer-events: auto; overflow: auto; }
+.page { position: absolute; top: 12px; left: 96px; right: 12px; bottom: 12px; pointer-events: auto; overflow: auto; --material: rgba(28, 28, 30, 0.96); }

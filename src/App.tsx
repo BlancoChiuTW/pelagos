@@ -23,6 +23,7 @@ import { InfoPanel } from './hud/InfoPanel'
 import { KpiWall } from './hud/KpiWall'
 import { VesselCard } from './hud/VesselCard'
 import { PerfHud, useFps } from './hud/PerfHud'
+import { TimeBar } from './hud/TimeBar'
 import { BootSequence } from './hud/BootSequence'
 import { Placeholder } from './pages/Placeholder'
 import { Vessels } from './pages/Vessels'
@@ -71,7 +72,9 @@ export default function App() {
     setRasterVisible(h.map, 'anomaly', rawFlags.anomaly && stage >= 1, 0.7)
   }, [h, grid, rawFlags.sst, rawFlags.anomaly, stage])
 
-  const t = useTicker(500)
+  const live = useTicker(500)
+  const scrub = useStore((s) => s.scrub)
+  const t = scrub ?? live // 回放時用回放時間（F12）
   const zoom = useMapZoom(h?.map ?? null)
   const snap = useFleetSnapshot(grid, now)
   const fleet = useFleetItems(snap, t)
@@ -148,6 +151,7 @@ export default function App() {
               ) : null}
             </AnimatePresence>
           }
+          bottom={<TimeBar live={live} />}
           bottomLeft={demoMode ? <PerfHud points={points} fps={fps} /> : undefined}
         />
       </div>

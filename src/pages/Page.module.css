@@ -25,7 +25,7 @@
 .section:first-child { margin-top: 0; }
 .form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .field { display: flex; flex-direction: column; gap: 4px; font: var(--t-caption); color: var(--label-2); }
-.field input, .field select, .field textarea { height: 34px; padding: 0 10px; border: 0; border-radius: 8px; background: var(--fill); color: var(--label); font: var(--t-subhead); outline: none; }
+.field input, .field select, .field textarea { width: 100%; min-width: 0; height: 34px; padding: 0 10px; border: 0; border-radius: 8px; background: var(--fill); color: var(--label); font: var(--t-subhead); outline: none; }
 .field textarea { height: 60px; padding: 8px 10px; resize: none; }
 .field input:focus, .field select:focus, .field textarea:focus { box-shadow: 0 0 0 2px var(--tint); }
 .full { grid-column: 1 / -1; }

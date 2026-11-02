@@ -4,6 +4,7 @@ import type { Epoch } from './data/types'
 
 export type LayerKey = 'sst' | 'anomaly' | 'currents' | 'buoys' | 'others' | 'fleet' | 'hotspot' | 'track'
 export type OthersCount = 10000 | 50000 | 100000
+/** 回放倍速：每秒前進幾分鐘 */
 export type Speed = 1 | 10 | 60
 export type FxQuality = 'high' | 'low'
 export type View = 'map' | 'vessels' | 'trips' | 'buoys' | 'alerts' | 'data'
@@ -21,6 +22,9 @@ export interface AppState {
   othersCount: OthersCount
   selectedVesselId: string | null
   time: { now: Epoch; cursor: Epoch; playing: boolean; speed: Speed }
+  /** 回放中的時間；null＝即時（F12） */
+  scrub: Epoch | null
+  setScrub: (t: Epoch | null) => void
   online: boolean
   intro: 'pending' | 'playing' | 'done'
   /** 開機序列進度：0 全暗 → 1 海溫 → 2 洋流 → 3 浮標 → 4 船隊 → 5 HUD（X01） */
@@ -54,6 +58,8 @@ export const useStore = create<AppState>()((set) => ({
   selectedVesselId: null,
   time: { now: loadNow, cursor: loadNow, playing: false, speed: 10 },
   online: typeof navigator === 'undefined' ? true : navigator.onLine,
+  scrub: null,
+  setScrub: (scrub) => set({ scrub }),
   intro: 'pending',
   introStage: 0,
   tour: { active: false, step: 0 },
