@@ -1,5 +1,6 @@
 // 資料介面（TECH_SPEC §5）。畫面與圖層只透過這裡拿資料；之後換 API 只改這個檔。
 import { decodeI16 } from './grid'
+import { seed } from '../sim/seed'
 import type { Epoch, FieldMeta, FleetSnapshot, GridMeta, OceanGrid } from './types'
 
 export interface DataSource {
@@ -38,9 +39,9 @@ export class StaticSource implements DataSource {
     }
   }
 
-  async loadFleet(_ocean: OceanGrid, _now: Epoch): Promise<FleetSnapshot> {
-    // S01 會改成呼叫 sim/seed.ts
-    return { vessels: [], trips: [], events: [], positions: [], buoys: [] }
+  async loadFleet(ocean: OceanGrid, now: Epoch): Promise<FleetSnapshot> {
+    // 模擬資料（S01）；正式版改成 API：GET /vessels、/trips、/events、/positions、/buoys
+    return seed(ocean, now)
   }
 }
 
