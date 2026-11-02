@@ -1,7 +1,7 @@
 # HANDOFF — PELAGOS 接力交接
 
 > 給接手的 AI（Claude Code／Codex 輪流）。**開工先讀完這份，再看 TASKS.md**。
-> 最後更新：2026-11-02 17:10（Claude）
+> 最後更新：2026-11-02（Claude）｜PRD 已改為 v2（功能編號有變，以 TASKS.md 為準）
 
 ## 這是什麼
 
@@ -13,6 +13,7 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 
 - 已有：Vite + React 19 + TS 骨架（仍是範例頁）、maplibre-gl 與 deck.gl 9 套件已裝
 - 已有：`etl/fetch_ocean.py` 抓好 NOAA 海溫（2026-10-17）與地轉流（2026-09-28），輸出在 `public/data/`。目前範圍只到東經 180°，T00 要擴大
+- PRD v2：核心資料模型是「船 → 航次 → 事件」（PRD §4），模擬資料照它產生
 - 下一步：TASKS.md 的 T00
 
 ## 接力規則（兩邊都必須遵守）
