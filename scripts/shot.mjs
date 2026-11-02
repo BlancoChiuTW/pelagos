@@ -20,6 +20,13 @@ page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`))
 await page.goto(url, { waitUntil: 'load' })
 await page.waitForTimeout(wait)
 // MOUSE="x,y" 讓滑鼠停在某點（測讀值、hover）；CLICK="x,y" 點一下
+// WHEEL="x,y,dy" 在某點捲動滾輪（正值＝縮小）
+if (process.env.WHEEL) {
+  const [x, y, dy] = process.env.WHEEL.split(',').map(Number)
+  await page.mouse.move(x, y)
+  for (let i = 0; i < 6; i++) { await page.mouse.wheel(0, dy / 6); await page.waitForTimeout(120) }
+  await page.waitForTimeout(Number(process.env.AFTER ?? 1800))
+}
 for (const [env, act] of [['MOUSE', 'move'], ['CLICK', 'click']]) {
   if (!process.env[env]) continue
   const [x, y] = process.env[env].split(',').map(Number)

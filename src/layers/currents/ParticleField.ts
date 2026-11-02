@@ -40,6 +40,8 @@ export class ParticleField {
   /** 可視範圍與網格範圍取交集 */
   private clip([w, s, e, n]: Bounds): Bounds {
     const [gw, gs, ge, gn] = this.grid.bounds
+    // 全球網格經度不裁（視窗跨 0°／360° 也照撒，取樣時會正規化）
+    if (this.grid.wrap) return [w, Math.max(s, gs), Math.min(e, w + 360), Math.min(n, gn)]
     return [Math.max(w, gw), Math.max(s, gs), Math.min(e, ge), Math.min(n, gn)]
   }
 

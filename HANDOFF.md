@@ -34,7 +34,9 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 - **NOAA 不能從瀏覽器直接抓（沒開 CORS）**，所以「資料串接」改成 CI 每日排程跑 ETL（`.github/workflows/deploy.yml` 的 schedule，失敗不擋部署）
 - 驗證：21 個單元測試；每頁都截圖看過
 - **剩下**：T02 部署（等 Blanco 同意建公開 repo）、README 技術決策（F18）、展示腳本彩排；X 特效系列已降為 P2
-- 下一步：F18 README（架構圖、技術決策、資料模型、參考開源）
+- **全球版**（TECH_SPEC §19.5）：海溫／異常／洋流全球 0.5°、經度 360° 相接（`GridMeta.wrap`）；陸地 NE 50m 全球
+- 進行中：資料串接的三個介面（VMS＝NAF、浮標＝兩家廠商格式、電子漁獲日誌＝FLUX XML），格式與解析在 `data/interfaces/formats.ts`（已有測試），UI 待做
+- 下一步：介面 UI → F18 README
 
 ## 接力規則（兩邊都必須遵守）
 

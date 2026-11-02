@@ -31,10 +31,10 @@ export class StaticSource implements DataSource {
     const keys: FieldKey[] = ['sst', 'anom', 'u', 'v']
     const bufs = await Promise.all(keys.map(async (k) => (await fetchOk(dataUrl(`${k}.i16`))).arrayBuffer()))
     const [sst, anom, u, v] = keys.map((k, i) => decodeI16(bufs[i], meta[k].scale, meta.nodata))
-    const { width, height, lon0, lat0, dlon, dlat, bounds } = meta
+    const { width, height, lon0, lat0, dlon, dlat, bounds, wrap } = meta
     const pick = (k: FieldKey): FieldMeta => ({ time: meta[k].time, source: meta[k].source, unit: meta[k].unit })
     return {
-      width, height, lon0, lat0, dlon, dlat, bounds, sst, anom, u, v,
+      width, height, lon0, lat0, dlon, dlat, bounds, wrap, sst, anom, u, v,
       meta: { sst: pick('sst'), anom: pick('anom'), u: pick('u'), v: pick('v') },
     }
   }

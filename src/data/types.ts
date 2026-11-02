@@ -73,6 +73,8 @@ export interface GridMeta {
   dlon: number
   dlat: number
   bounds: [number, number, number, number]
+  /** 經度涵蓋 360°（全球），取樣時左右相接 */
+  wrap?: boolean
 }
 
 export interface FieldMeta {

@@ -390,3 +390,9 @@ interface AppState {
 - 名牌：TextLayer（`characterSet: 'auto'`，Apple 系統字），zoom ≥ 4.5 或選中時顯示
 - 航跡：TripsLayer，全自家船 24h，時間以「小時」為單位（避免 Float32 精度），`trailLength` 12h、`fadeTrail`
 - 滑過：MapboxOverlay `getTooltip` 回傳 Apple 樣式小卡
+
+### 19.5 全球版（2026-11-02 晚，Blanco：「要全球的版本，不要只有一片洋流」）
+- 海況網格改為全球：經度 0–360（格心 0.125–359.625）、78°S–80°N、0.5°，720×316；`ocean.json` 加 `wrap: true`
+- `grid.ts`：`wrap` 時欄位對 width 取模，最後一欄與第一欄雙線性相接；粒子場經度不裁；worker 陸地判斷同樣取模
+- 色圖放大倍率 3 → 2；陸地改 Natural Earth 50m 全球（經度 −180–180，MapLibre 會畫到每個世界副本）
+- 資料檔總量約 4.3 MB（PNG 1.7 MB、Int16 1.8 MB、land 0.8 MB）

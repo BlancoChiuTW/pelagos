@@ -30,6 +30,12 @@ describe('grid', () => {
     expect(isLand(g, f, 179, 0)).toBe(false)
     expect(isLand(g, f, 0, 0)).toBe(true)
   })
+  it('全球網格在 360°/0° 相接', () => {
+    const w: GridMeta = { width: 4, height: 1, lon0: 45, lat0: 0, dlon: 90, dlat: 1, bounds: [0, -0.5, 360, 0.5], wrap: true }
+    const v = new Float32Array([0, 10, 20, 30]) // 45E,135E,225E,315E
+    expect(sample(w, v, 0, 0)).toBeCloseTo(15) // 315E 與 45E 的中間
+    expect(sample(w, v, -45, 0)).toBeCloseTo(30)
+  })
   it('decodeI16 還原數值與 nodata', () => {
     const out = decodeI16(new Int16Array([2850, -32768]).buffer, 0.01, -32768)
     expect(out[0]).toBeCloseTo(28.5)

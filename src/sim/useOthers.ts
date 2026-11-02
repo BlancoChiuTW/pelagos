@@ -18,8 +18,8 @@ export function useOthers(grid: OceanGrid | null, count: number, t: number, enab
     w.onmessage = (e: MessageEvent<FromWorker>) => setFrame({ count: e.data.count, positions: e.data.positions, t: e.data.t })
     const landmask = new Uint8Array(grid.sst.length)
     for (let i = 0; i < landmask.length; i++) landmask[i] = Number.isNaN(grid.sst[i]) ? 1 : 0
-    const { width, height, lon0, lat0, dlon, dlat, bounds } = grid
-    const msg: ToWorker = { kind: 'init', count, seed: SEED + 7, landmask, grid: { width, height, lon0, lat0, dlon, dlat, bounds }, t: Date.now() }
+    const { width, height, lon0, lat0, dlon, dlat, bounds, wrap } = grid
+    const msg: ToWorker = { kind: 'init', count, seed: SEED + 7, landmask, grid: { width, height, lon0, lat0, dlon, dlat, bounds, wrap }, t: Date.now() }
     w.postMessage(msg, [landmask.buffer])
     return () => {
       w.terminate()

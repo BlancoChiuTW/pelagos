@@ -19,9 +19,11 @@ export function fmtLat(lat: Lat, digits = 2): string {
 
 /** 經緯度 → 浮點格座標（格心為整數）；超出範圍回傳 null */
 export function toCell(g: GridMeta, lon: Lon, lat: Lat): [number, number] | null {
-  const c = (normLon(lon) - g.lon0) / g.dlon
+  let c = (normLon(lon) - g.lon0) / g.dlon
   const r = (lat - g.lat0) / g.dlat
-  if (c < 0 || r < 0 || c > g.width - 1 || r > g.height - 1) return null
+  if (r < 0 || r > g.height - 1) return null
+  if (g.wrap) c = ((c % g.width) + g.width) % g.width // 全球：最後一欄與第一欄相接
+  else if (c < 0 || c > g.width - 1) return null
   return [c, r]
 }
 
@@ -32,7 +34,7 @@ export function sample(g: GridMeta, field: Float32Array, lon: Lon, lat: Lat): nu
   const [c, r] = cell
   const c0 = Math.floor(c)
   const r0 = Math.floor(r)
-  const c1 = Math.min(c0 + 1, g.width - 1)
+  const c1 = g.wrap ? (c0 + 1) % g.width : Math.min(c0 + 1, g.width - 1)
   const r1 = Math.min(r0 + 1, g.height - 1)
   const fc = c - c0
   const fr = r - r0
@@ -58,7 +60,7 @@ export function sample(g: GridMeta, field: Float32Array, lon: Lon, lat: Lat): nu
 export function isLand(g: GridMeta, field: Float32Array, lon: Lon, lat: Lat): boolean {
   const cell = toCell(g, lon, lat)
   if (!cell) return true
-  const i = Math.round(cell[1]) * g.width + Math.round(cell[0])
+  const i = Math.round(cell[1]) * g.width + (Math.round(cell[0]) % g.width)
   return Number.isNaN(field[i])
 }
 

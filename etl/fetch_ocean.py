@@ -6,7 +6,7 @@
 烘焙成前端用的二進位網格（TECH_SPEC §3）：
   public/data/ocean.json、sst.i16、anom.i16、u.i16、v.i16、sst.png、anom.png
 
-範圍 100°E→210°E（＝150°W）、20°S→45°N，0.5°。資料集經度是 −180–180，
+範圍全球（經度 0–360、78°S→80°N），0.5°。資料集經度是 −180–180，
 OISST 用 0–360 版一段抓完；洋流資料集是 −180–180，跨換日線分兩段抓、第二段 +360 後接上。原始回應快取在 etl/raw/（刪掉才會重抓）。
 
 用法：uv run etl/fetch_ocean.py
@@ -26,10 +26,10 @@ RAW = ROOT / "etl" / "raw"
 NODATA = -32768
 
 # 0.25° 資料集取 stride 2 → 0.5°；格心 .125/.625
-LAT = "(-19.875):2:(44.875)"
+LAT = "(-77.875):2:(79.875)"  # 全球（海冰與高緯缺值以陸地處理）
 # 經度 0–360 的資料集一段抓完；−180–180 的資料集跨換日線分兩段，第二段 +360
-SEG_360 = [("all", "(100.125):2:(209.625)", 0.0)]
-SEG_PM180 = [("east", "(100.125):2:(179.625)", 0.0), ("west", "(-179.875):2:(-150.125)", 360.0)]
+SEG_360 = [("all", "(0.125):2:(359.625)", 0.0)]
+SEG_PM180 = [("east", "(0.125):2:(179.625)", 0.0), ("west", "(-179.875):2:(-0.375)", 360.0)]
 
 
 def griddap(dataset: str, query: str, key: str) -> dict:
@@ -115,6 +115,7 @@ d = 0.5
 meta = {
     "width": W, "height": H, "lon0": float(lons[0]), "lat0": float(lats[0]), "dlon": d, "dlat": d,
     "bounds": [float(lons[0] - d / 2), float(lats[0] - d / 2), float(lons[-1] + d / 2), float(lats[-1] + d / 2)],
+    "wrap": True,  # 經度涵蓋 360°，取樣時左右相接
     "nodata": NODATA,
     "sst": {"time": sst_time, "source": src_oi, "scale": 0.01, "unit": "°C"},
     "anom": {"time": sst_time, "source": src_oi, "scale": 0.01, "unit": "°C"},
@@ -124,7 +125,7 @@ meta = {
 json.dump(meta, open(OUT / "ocean.json", "w"), ensure_ascii=False, indent=1)
 
 
-UP = 3  # 色圖放大倍率（雙三次內插，海溫看起來連續）
+UP = 2  # 色圖放大倍率（全球版用 2 倍，控制檔案大小）
 
 
 def extrapolate(g: np.ndarray, iters: int = 4) -> np.ndarray:

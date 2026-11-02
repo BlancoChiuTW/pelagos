@@ -16,7 +16,8 @@ let lon: Float32Array, lat: Float32Array, vlon: Float32Array, vlat: Float32Array
 let lastT = 0
 
 const isLand = (x: number, y: number) => {
-  const c = Math.round((x - grid.lon0) / grid.dlon)
+  let c = Math.round(((((x % 360) + 360) % 360) - grid.lon0) / grid.dlon)
+  if (grid.wrap) c = ((c % grid.width) + grid.width) % grid.width
   const r = Math.round((y - grid.lat0) / grid.dlat)
   if (c < 0 || r < 0 || c >= grid.width || r >= grid.height) return true
   return land[r * grid.width + c] === 1
@@ -35,7 +36,7 @@ function init(m: Extract<ToWorker, { kind: 'init' }>) {
     const tropical = rng() < 0.6
     for (let t = 0; t < 20; t++) {
       const x = tropical ? 130 + rng() * 70 : w + rng() * (e - w)
-      const y = tropical ? -10 + rng() * 25 : s + rng() * (nn - s)
+      const y = tropical ? -10 + rng() * 25 : Math.max(s, -60) + rng() * (Math.min(nn, 65) - Math.max(s, -60))
       if (!isLand(x, y)) { lon[i] = x; lat[i] = y; break }
     }
     const kn = rng() < 0.3 ? rng() * 2 : 6 + rng() * 8 // 30% 慢速（作業／漂流）
