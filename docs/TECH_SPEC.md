@@ -1,4 +1,4 @@
-# PELAGOS 技術規格 v1.1
+# PELAGOS 技術規格 v2（對應 PRD v3，§19 為準）
 
 > 對應 PRD v2。PRD 講「做什麼」，這份講「怎麼做」。兩份衝突時以 PRD 的驗收標準為準，並在 HANDOFF「待 Blanco 決定」提出。
 > 最後更新：2026-11-02（Claude）
@@ -366,3 +366,27 @@ interface AppState {
 ### 18.6 不做
 - MapLibre 地球儀投影（與 deck.gl 相容性未驗證）
 - three.js（與 deck.gl 搶同一個 WebGL 畫布，除錯成本高）
+
+## 19. v3 改版實作（以此為準）
+
+### 19.1 頁面切換
+不用 router 套件：`store.view: 'map' | 'vessels' | 'trips' | 'buoys' | 'alerts' | 'data'`；地圖常駐（切到管理頁時地圖隱藏但不卸載，回來不用重載）。
+
+### 19.2 持久化
+`idb-keyval`（IndexedDB）存三種覆寫資料：`vesselEdits`（主檔欄位）、`addedEvents`（手動事件）、`imports`（匯入的圖層）、`alertAck`（已處理）。模擬資料仍由 seed 產生，覆寫資料在 `DataSource` 合併。提供 `resetDemo()`。
+
+### 19.3 設計 token（取代 §14 與 PRD §8 的科幻 token）
+```
+字體：-apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC", "Noto Sans TC", "Inter", sans-serif（Noto Sans TC／Inter 用 @fontsource 打包，Windows 也一致）
+字級：--t-title2 22/28 700、--t-headline 17/22 600、--t-subhead 15/20、--t-footnote 13/18、--t-caption 12/16、--t-caption2 11/13
+色：--label #fff、--label-2 rgba(235,235,245,.6)、--label-3 rgba(235,235,245,.3)、--sep rgba(84,84,88,.55)
+    --tint #64d2ff（systemCyan）、--green #30d158、--orange #ff9f0a、--red #ff453a、--gray #8e8e93
+材質：--material rgba(28,28,30,.72)＋backdrop-filter: blur(30px) saturate(180%)；圓角 14px；0.5px 白 12% 邊框；陰影 0 8px 32px rgba(0,0,0,.45)
+```
+
+### 19.4 地圖表現（V02）
+- 船艦：IconLayer 俯視剪影（SVG、mask、船身淺灰白），圍網船＝尖船首＋駕駛艙鏤空＋船尾小艇；運搬船＝長船身＋三個艙蓋鏤空。尺寸依 zoom 分級
+- 狀態環：ScatterplotLayer 只描邊（2px、狀態色），選中船加大並換強調色
+- 名牌：TextLayer（`characterSet: 'auto'`，Apple 系統字），zoom ≥ 4.5 或選中時顯示
+- 航跡：TripsLayer，全自家船 24h，時間以「小時」為單位（避免 Float32 精度），`trailLength` 12h、`fadeTrail`
+- 滑過：MapboxOverlay `getTooltip` 回傳 Apple 樣式小卡
