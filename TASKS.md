@@ -1,0 +1,37 @@
+# TASKS — PELAGOS 待辦板
+
+> 規則見 HANDOFF.md「接力規則」。由上往下做；一次只認領一項。
+> 狀態：`[ ]` 未開始｜`[~] 認領者 HH:MM` 進行中｜`[x]` 完成（附 commit 短碼）
+> 每項的驗收標準在 docs/PRD.md 對應的 F 編號。
+
+## M0 基礎（P0 前置）
+- [ ] T00 ETL 範圍改成東經 100°→西經 150°（經度 0–360，ERDDAP 要分兩段抓再接）、南緯 20°→北緯 45°；加抓海溫異常 `anom` 輸出 `sst_anom.png` 與 `sst.json` 內的 anom 欄位。改 `etl/fetch_ocean.py`，刪 `etl/raw/` 後重跑
+- [ ] T01 專案骨架：裝 zustand；建立 `src/styles/tokens.css`、`src/store.ts`、`src/data/DataSource.ts`（介面＋StaticSource）、`src/map/MapView.tsx`（MapLibre＋deck.gl MapboxOverlay）；刪 Vite 範例內容；`npm run verify` 綠
+- [ ] T02 GitHub Pages 部署：`vite.config.ts` 設 base；`.github/workflows/deploy.yml`。**建立公開 repo 與 push 要等 Blanco 同意**
+
+## M1 P0（目標 11/02 22:00）
+- [ ] F01 HUD 版面與換日線連續（PRD F01）
+- [ ] F02 海溫圖層＋滑鼠讀值＋圖例
+- [ ] F03 洋流粒子動畫
+- [ ] F04 船隊圖層（自家 36 艘＋周邊 Worker 模擬）
+- [ ] F05 FAD 浮標圖層
+- [ ] F06 船隻詳情卡
+- [ ] F07 KPI 牆
+- [ ] F08 效能 HUD＋數量切換
+- [ ] F09 資料來源與時間標示
+- [ ] F10 開場動畫
+
+## M2 P1（目標 11/03 03:00）
+- [ ] F11 時間軸回放
+- [ ] F12 事件警示流
+- [ ] F13 漁場預測圖層
+- [ ] F14 海溫異常圖層
+- [ ] F15 離線與降級
+- [ ] F16 自動導覽
+- [ ] F17 README 技術決策＋效能量測表
+
+## M3 P2（有時間才做）
+- [ ] F18 EEZ 界線
+- [ ] F19 颱風
+- [ ] F20 搜尋篩選
+- [ ] F21 手機版
