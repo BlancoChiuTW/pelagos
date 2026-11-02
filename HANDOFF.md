@@ -5,7 +5,7 @@
 
 ## 這是什麼
 
-PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `docs/PRD.md`。
+PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `docs/PRD.md`（做什麼），技術規格在 `docs/TECH_SPEC.md`（怎麼做）。
 公司與船名全部虛構（藍潮漁業）。**不得在任何檔案或畫面寫入真實公司名稱。**
 展示期限：2026-11-03 12:00 最終部署；10:00 起凍結功能、只修錯。
 
@@ -56,14 +56,7 @@ docs/PRD.md     規格
 
 ## 資料格式
 
-`public/data/sst.json`
-```
-{ width, height, bounds:[w,s,e,n], lat0, lon0, dlat, dlon, time, source, unit:"degC*10",
-  values: number|null[][]   // [列=緯度由南到北][欄=經度由西到東]，null = 陸地
-}
-```
-`public/data/currents.json`：同樣的網格欄位，外加 `u`、`v`（m/s，[列][欄]，陸地與赤道 ±3° 為 0）。
-`public/data/sst.png`：海溫色圖，**北在上**，陸地透明，對應 `bounds`。
+以 `docs/TECH_SPEC.md` §3.3 為準（二進位 Int16＋ocean.json）。T00 完成前 `public/data/` 還是舊的 JSON 格式（sst.json、currents.json，範圍只到 180°E），不要拿來寫新功能。
 
 ## 陷阱
 

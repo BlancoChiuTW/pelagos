@@ -2,11 +2,11 @@
 
 > 規則見 HANDOFF.md「接力規則」。由上往下做；一次只認領一項。
 > 狀態：`[ ]` 未開始｜`[~] 認領者 HH:MM` 進行中｜`[x]` 完成（附 commit 短碼）
-> 每項的驗收標準在 docs/PRD.md 對應的 F 編號。
+> 每項的驗收標準在 docs/PRD.md 對應的 F 編號；實作方式照 docs/TECH_SPEC.md。
 
 ## M0 基礎（P0 前置）
-- [ ] T00 ETL 範圍改成東經 100°→西經 150°（經度 0–360，ERDDAP 要分兩段抓再接）、南緯 20°→北緯 45°；加抓海溫異常 `anom` 輸出 `sst_anom.png` 與 `sst.json` 內的 anom 欄位。改 `etl/fetch_ocean.py`，刪 `etl/raw/` 後重跑
-- [ ] T01 專案骨架：裝 zustand；建立 `src/styles/tokens.css`、`src/store.ts`、`src/data/DataSource.ts`（介面＋StaticSource）、`src/map/MapView.tsx`（MapLibre＋deck.gl MapboxOverlay）；刪 Vite 範例內容；`npm run verify` 綠
+- [ ] T00 ETL 改版（TECH_SPEC §3）：範圍 100°E→210°E、20°S→45°N，跨換日線分兩段抓再 +360 接上；加抓 anom；輸出改二進位 `ocean.json`＋`*.i16`＋`sst.png`／`anom.png`；刪舊的 sst.json／currents.json；`scripts/verify.sh` 的資料檔清單同步改
+- [ ] T01 專案骨架（TECH_SPEC §1、§2、§5、§9）：裝 zustand、vitest、@fontsource/jetbrains-mono；建 types／DataSource／grid／store／tokens／MapView；**先做冒煙測試**（MapboxOverlay＋maplibre 6 能畫點、200°E 的點不斷裂、洋流 canvas 插在中間）；verify 加 `vitest run`；刪 Vite 範例
 - [ ] T02 GitHub Pages 部署：`vite.config.ts` 設 base；`.github/workflows/deploy.yml`。**建立公開 repo 與 push 要等 Blanco 同意**
 
 ## M1 P0（目標 11/02 22:00）
