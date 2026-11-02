@@ -1,9 +1,12 @@
-# push main → 驗證 → 部署到 GitHub Pages（TECH_SPEC §16）
+# push main 或每日排程 → （排程時）抓 NOAA 最新海況 → 驗證 → 部署到 GitHub Pages
+# NOAA 抓取失敗不擋部署：沿用 repo 內上一次的資料（M03 資料串接）
 name: deploy
 on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '0 22 * * *' # 每天台北 06:00
 permissions:
   contents: read
   pages: write
@@ -20,6 +23,11 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - uses: astral-sh/setup-uv@v6
+      - name: 更新 NOAA 海況（排程時）
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        run: uv run etl/fetch_ocean.py
       - run: npm ci
       - run: npm run verify
       - uses: actions/upload-pages-artifact@v3

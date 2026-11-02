@@ -31,6 +31,7 @@ import { Trips } from './pages/Trips'
 import { Alerts } from './pages/Alerts'
 import { Buoys } from './pages/Buoys'
 import { buildAlerts } from './sim/alerts'
+import { DataHub } from './pages/DataHub'
 import { useOverrides } from './data/overrides'
 import type { Alert } from './data/types'
 
@@ -104,6 +105,7 @@ export default function App() {
   const points = (others?.count ?? 0) + (buoys?.n ?? 0) + fleet.length
   const alerts = useMemo(() => (snap ? buildAlerts(fleet, snap, t) : []), [fleet, snap, t])
   const ack = useOverrides((o) => o.ack)
+  const imports = useOverrides((o) => o.imports)
   const alertCount = alerts.filter((a) => a.level !== 'info' && !ack[a.id]).length
   const locateAlert = (a: Alert) => {
     useStore.getState().setView('map')
@@ -119,8 +121,8 @@ export default function App() {
   }
 
   const layers = useMemo<Layer[]>(
-    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t }),
-    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t],
+    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t, imports }),
+    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t, imports],
   )
   const introDone = useCallback(() => setIntro('done'), [setIntro])
   const bootSteps = [
@@ -141,6 +143,7 @@ export default function App() {
           page={onMap ? undefined : view === 'vessels' ? <Vessels fleet={fleet} now={t} /> : view === 'trips' && snap ? <Trips fleet={fleet} snap={snap} now={t} onEvent={goEvent} />
               : view === 'alerts' ? <Alerts alerts={alerts} onLocate={locateAlert} />
               : view === 'buoys' && snap ? <Buoys snap={snap} fleet={fleet} trackStart={trackStart} now={t} onGo={goBuoy} />
+              : view === 'data' ? <DataHub grid={grid} snap={snap} now={t} />
               : <Placeholder view={view} />}
           right={
             <AnimatePresence mode="wait">

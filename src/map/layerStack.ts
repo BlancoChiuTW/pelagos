@@ -7,6 +7,8 @@ import { createFleetLayers } from '../layers/fleet'
 import { createOthersLayer } from '../layers/others'
 import { createBuoyLayer, type BuoyFrame } from '../layers/buoys'
 import { createTripTrackLayers } from '../layers/tripTrack'
+import { createImportLayers } from '../layers/imports'
+import type { ImportLayer } from '../data/overrides'
 import type { Epoch, TripEvent } from '../data/types'
 
 export interface StackInput {
@@ -21,12 +23,14 @@ export interface StackInput {
   onSelect: (id: string) => void
   trackStart: Epoch
   t: Epoch
+  imports: ImportLayer[]
 }
 
 export function buildLayers(i: StackInput): Layer[] {
   const out: Layer[] = []
   if (i.layers.others && i.others) out.push(createOthersLayer(i.others, i.zoom))
   if (i.layers.buoys && i.buoys) out.push(createBuoyLayer(i.buoys, i.zoom))
+  if (i.imports.length) out.push(...createImportLayers(i.imports, i.zoom))
   const sel = i.fleet.find((f) => f.vessel.id === i.selectedId)
   if (sel) out.push(...createTripTrackLayers(sel.track, i.selectedEvents))
   if (i.layers.fleet && i.fleet.length)

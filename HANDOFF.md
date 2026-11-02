@@ -28,7 +28,13 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 - **M1 剩下**：X02 光柱、X03 拖尾、X04 脈衝、X05 光暈、X06 面板轉場（詳情卡滑入與時間軸 stagger 已做，剩警示流）、X08 特效等級，以及 T02 部署（等 Blanco）
 - **v3 改版（PRD §15、TECH_SPEC §19）**：Blanco 要「一套有管理功能的系統」＋Apple 介面＋戰略遊戲地圖＋視覺減法
 - V01–V03 完成：Apple token（`styles/tokens.css`，舊變數名保留為別名）、Inter＋Noto Sans TC 打包；左側導覽列（`hud/Sidebar`）、上方工具列（搜尋／圖層 iOS 開關／資訊）、右側情境面板（沒選船＝KPI 總覽、選船＝詳情卡）；`store.view` 切頁，管理頁暫為 `pages/Placeholder`。地圖：俯視剪影＋狀態環＋名牌（zoom ≥ 4.5）＋全船隊 24h TripsLayer 航跡＋滑過小卡。預設圖層只開船隊＋航跡＋淡化海溫（飽和度 −0.45、透明 0.38）。已刪 TopBar／Readout／Legend／SourceBadge（併入資訊選單）
-- 下一步：M01 船舶管理（`pages/Vessels.tsx`；編輯存 IndexedDB `idb-keyval`，見 TECH_SPEC §19.2）
+- 航線：Catmull-Rom 平滑＋雙層光暈（`layers/fleet.ts`）；運搬船 `trip.plan` 預定航線虛線＋ETA（`@deck.gl/extensions` PathStyleExtension）
+- 管理模組全部完成（`src/pages/`）：船舶（表格搜尋篩選排序＋主檔編輯）、航次（每日漁獲圖＋新增事件＋病程）、浮標（魚量前 60＋前往）、警示（`sim/alerts.ts` 規則＋已處理）、資料串接（連線卡＋CSV/GeoJSON 匯入＋欄位對應＋範例 `public/data/sample_vms.csv`）。使用者資料在 `data/overrides.ts`（IndexedDB，`mergeSnapshot` 合併新增事件）
+- F12 時間軸（`hud/TimeBar.tsx`，`store.scrub`：null＝即時）
+- **NOAA 不能從瀏覽器直接抓（沒開 CORS）**，所以「資料串接」改成 CI 每日排程跑 ETL（`.github/workflows/deploy.yml` 的 schedule，失敗不擋部署）
+- 驗證：21 個單元測試；每頁都截圖看過
+- **剩下**：T02 部署（等 Blanco 同意建公開 repo）、README 技術決策（F18）、展示腳本彩排；X 特效系列已降為 P2
+- 下一步：F18 README（架構圖、技術決策、資料模型、參考開源）
 
 ## 接力規則（兩邊都必須遵守）
 
