@@ -88,7 +88,8 @@ etl/fetch_ocean.py
 |---|---|
 | `ocean.json` | 中繼資料：`{ width, height, lon0, lat0, dlon, dlat, bounds:[w,s,e,n], sst:{time,source,scale:0.01,nodata:-32768}, anom:{...}, u:{time,source,scale:0.001,nodata:-32768}, v:{...} }` |
 | `sst.i16` `anom.i16` `u.i16` `v.i16` | Int16 little-endian，長度 width×height，`值 × scale` 還原；`nodata` 代表陸地 |
-| `sst.png` `anom.png` | 預先上色的圖（北在上、陸地透明），給 BitmapLayer 直接用 |
+| `sst.png` `anom.png` | 預先上色、放大 3 倍（雙三次）、**整張外推填滿不透明**，北在上；前端用 MapLibre image source |
+| `land.geojson` | Natural Earth 10m 陸地，裁到範圍、經度 0–360、簡化 0.01°；蓋在海溫上讓海岸銳利（`etl/fetch_land.py`） |
 
 `lon0`／`lat0` 是第一格中心。格 (r, c) 的中心＝(`lon0 + c·dlon`, `lat0 + r·dlat`)。
 
@@ -158,7 +159,8 @@ interface DataSource {
 | 層 | 實作 | 備註 |
 |---|---|---|
 | 底圖 | MapLibre | |
-| 海溫／海溫異常 | deck `BitmapLayer`，image = `sst.png`／`anom.png`，bounds = ocean.bounds | 不透明度 0.75；二選一 |
+| 海溫／海溫異常 | **MapLibre** image source＋raster layer（插在第一個 symbol 圖層前），透明度補間開關 | 不透明度 0.8；二選一 |
+| 陸地＋海岸線 | MapLibre geojson（land.geojson）fill `#0e0e0e`＋line 淡青 0.7px | 蓋住海溫的方塊海岸 |
 | 海況熱區 | deck `BitmapLayer`，image 由 canvas 即時產生 | 加法混色 |
 | **洋流粒子** | **獨立 `<canvas>`，插在 MapLibre 畫布與 deck 畫布之間** | 所以船和浮標永遠在粒子上面 |
 | FAD 浮標 | 近：`ScatterplotLayer`；zoom < 5：`GridLayer`（GPU 聚合，cellSize 50 km，依魚量加總上色） | |
@@ -273,7 +275,7 @@ interface AppState {
 | 周邊船 tick | worker 內 < 30 ms／10 萬艘 |
 | deck layer 重建 | 只在 store 變動或收到 frame 時，不得每幀重建 |
 | 首次可互動 | < 3 秒（本機 production build） |
-| 資料檔 | < 300 KB（不含底圖） |
+| 資料檔 | < 1.3 MB 未壓縮（PNG 色圖約 230＋310 KB、land.geojson 約 500 KB，gzip 後約一半）；不含底圖 |
 
 效能 HUD：FPS 用 `requestAnimationFrame` 間隔的 1 秒移動平均；繪製點數＝周邊船＋浮標＋自家船。
 

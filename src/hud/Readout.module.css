@@ -1,0 +1,3 @@
+.readout { width: 260px; font-family: var(--font-num); font-size: 11px; }
+.row { display: flex; justify-content: space-between; line-height: 18px; }
+.row span:first-child { color: var(--text-dim); font-family: var(--font-ui); }

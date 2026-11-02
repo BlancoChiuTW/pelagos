@@ -124,15 +124,40 @@ meta = {
 json.dump(meta, open(OUT / "ocean.json", "w"), ensure_ascii=False, indent=1)
 
 
+UP = 3  # 色圖放大倍率（雙三次內插，海溫看起來連續）
+
+
+def extrapolate(g: np.ndarray, iters: int = 4) -> np.ndarray:
+    """把海上數值往陸地外推幾格（鄰格平均），放大內插時海岸不會被 NaN 吃掉"""
+    out = g.copy()
+    for _ in range(iters):
+        nan = np.isnan(out)
+        if not nan.any():
+            break
+        pad = np.pad(out, 1, constant_values=np.nan)
+        nb = np.stack([pad[1:-1, :-2], pad[1:-1, 2:], pad[:-2, 1:-1], pad[2:, 1:-1]])
+        with np.errstate(all="ignore"):
+            mean = np.nanmean(nb, axis=0)
+        out = np.where(nan & ~np.isnan(mean), mean, out)
+    return out
+
+
+def upsample(a: np.ndarray) -> np.ndarray:
+    img = Image.fromarray(a.astype(np.float32), mode="F")
+    return np.asarray(img.resize((a.shape[1] * UP, a.shape[0] * UP), Image.Resampling.BICUBIC))
+
+
 def colorize(g: np.ndarray, stops: np.ndarray, alpha_from_stops: bool = False) -> Image.Image:
-    rgba = np.zeros((H, W, 4), dtype=np.uint8)
-    t = np.clip(np.nan_to_num(g, nan=stops[0, 0]), stops[0, 0], stops[-1, 0])
+    # 整張外推填滿、不留透明：海岸由前端疊的 Natural Earth 陸地（land.geojson）蓋住，才銳利
+    vals = upsample(np.nan_to_num(extrapolate(g, iters=40), nan=float(stops[0, 0])))
+    h, w = vals.shape
+    rgba = np.zeros((h, w, 4), dtype=np.float32)
+    t = np.clip(vals, stops[0, 0], stops[-1, 0])
     for c in range(4 if alpha_from_stops else 3):
-        rgba[..., c] = np.interp(t, stops[:, 0], stops[:, c + 1]).astype(np.uint8)
+        rgba[..., c] = np.interp(t, stops[:, 0], stops[:, c + 1])
     if not alpha_from_stops:
         rgba[..., 3] = 255
-    rgba[np.isnan(g), 3] = 0
-    return Image.fromarray(rgba[::-1])  # 北在上
+    return Image.fromarray(np.clip(rgba, 0, 255).astype(np.uint8)[::-1])  # 北在上
 
 
 SST_STOPS = np.array([[10, 8, 29, 88], [16, 37, 52, 148], [20, 34, 94, 168], [23, 29, 145, 192], [26, 65, 182, 196],

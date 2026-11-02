@@ -1,4 +1,4 @@
-// 本機截圖：node scripts/shot.mjs [url] [out.png] [waitMs]
+// 本機截圖：[MOUSE=x,y] [CLICK=x,y] node scripts/shot.mjs [url] [out.png] [waitMs]
 // 用 Playwright 快取的 chromium（~/.cache/ms-playwright），開 WebGL（SwiftShader）
 import { chromium } from 'playwright-core'
 import { readdirSync } from 'node:fs'
@@ -19,6 +19,14 @@ page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`))
 page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`))
 await page.goto(url, { waitUntil: 'load' })
 await page.waitForTimeout(wait)
+// MOUSE="x,y" 讓滑鼠停在某點（測讀值、hover）；CLICK="x,y" 點一下
+for (const [env, act] of [['MOUSE', 'move'], ['CLICK', 'click']]) {
+  if (!process.env[env]) continue
+  const [x, y] = process.env[env].split(',').map(Number)
+  await page.mouse.move(x, y)
+  if (act === 'click') await page.mouse.click(x, y)
+  await page.waitForTimeout(800)
+}
 await page.screenshot({ path: out })
 const info = await page.evaluate(() =>
   [...document.querySelectorAll('canvas')].map((c) => `${c.className || '(no class)'} z=${getComputedStyle(c).zIndex} ${c.width}x${c.height} parent=${c.parentElement?.className}`),

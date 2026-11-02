@@ -14,7 +14,9 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 - T01 完成：骨架（types／grid／DataSource／store／tokens／MapView）；冒煙測試已用無頭瀏覽器截圖確認——deck.gl 9.4＋MapLibre 6 可畫、120°E／180°／200°E 的點與海溫跨換日線連續、洋流 canvas 夾在 MapLibre 與 deck 畫布之間
 - T00 完成：`public/data/` 已是 TECH_SPEC §3.3 的二進位格式，範圍 100°E–210°E（跨換日線無接縫，已目視 sst.png）。海溫／異常 2026-10-17，洋流 2026-09-28；網格 220×130、陸地 14%
 - PRD v2：核心資料模型是「船 → 航次 → 事件」（PRD §4），模擬資料照它產生
-- 下一步：TASKS.md 的 T02（部署設定；建 repo／push 等 Blanco），接著 F01
+- F01、F02 完成並截圖確認（海溫＋銳利海岸線、游標讀值、色階圖例、圖層開關面板；海溫／異常二選一）
+- T02 工作流程已寫，**等 Blanco 同意建公開 repo `pelagos` 與 push**
+- 下一步：F03 洋流粒子
 
 ## 接力規則（兩邊都必須遵守）
 
@@ -68,7 +70,7 @@ docs/PRD.md     規格
 ## 陷阱
 
 - **MapLibre 6 的 worker**：它用 `import.meta.url` 找 worker，Vite 打包後會 404、地圖不出來。`MapView.tsx` 已用 `?url` 匯入並 `setWorkerUrl`，不要拿掉。
-- **海溫海岸線鋸齒**：海溫是 0.5° 網格，現在用 deck BitmapLayer 蓋在底圖上，陸地邊緣呈方塊狀。F02 建議改用 MapLibre 原生 `image` source＋raster layer，`beforeId` 放在底圖陸地圖層之前，讓陸地蓋住鋸齒。
+- **海岸線（已解決，別改回去）**：底圖的陸地是 background、海是 `water` 圖層，無法把海溫壓在陸地下。作法是海溫 PNG 整張外推填滿（不透明），再用 MapLibre 疊 `land.geojson`（Natural Earth 10m，`etl/fetch_land.py`）同色陸地＋淡青海岸線蓋上去。海溫與陸地都插在第一個 symbol 圖層前，地名在最上面。
 
 - **換日線**：作業海域跨東經 180°。內部經度一律用 0–360（例如西經 150° = 210）；MapLibre 能吃超過 180 的經度，deck.gl 圖層也一樣。不要在 −180/180 處切資料。
 - **赤道地轉流**：地轉流在赤道附近不成立，ETL 已把 |緯度| < 3° 設為 0，粒子在那裡會停住，這是正常的。
