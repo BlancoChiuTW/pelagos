@@ -45,6 +45,11 @@ export class ParticleField {
     return [Math.max(w, gw), Math.max(s, gs), Math.min(e, ge), Math.min(n, gn)]
   }
 
+  /** 只更新可視範圍、不重撒（地圖移動中用）：跑出範圍的粒子在 step() 時自然在新範圍重生 */
+  setBounds(bounds: Bounds) {
+    this.bounds = this.clip(bounds)
+  }
+
   reseed(bounds: Bounds) {
     this.bounds = this.clip(bounds)
     for (let i = 0; i < this.n; i++) this.spawn(i, true)

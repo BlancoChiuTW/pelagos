@@ -39,7 +39,15 @@ for (const [env, act] of [['MOUSE', 'move'], ['CLICK', 'click']]) {
     await page.waitForTimeout(Number(process.env.AFTER ?? 1800))
   }
 }
-await page.screenshot({ path: out })
+// DRAG="x1,y1,x2,y2" 拖曳地圖，在放開前（移動中）截圖
+if (process.env.DRAG) {
+  const [x1, y1, x2, y2] = process.env.DRAG.split(',').map(Number)
+  await page.mouse.move(x1, y1)
+  await page.mouse.down()
+  for (let i = 1; i <= 12; i++) { await page.mouse.move(x1 + ((x2 - x1) * i) / 12, y1 + ((y2 - y1) * i) / 12); await page.waitForTimeout(60) }
+  await page.screenshot({ path: out })
+  await page.mouse.up()
+} else await page.screenshot({ path: out })
 const info = await page.evaluate(() =>
   [...document.querySelectorAll('canvas')].map((c) => `${c.className || '(no class)'} z=${getComputedStyle(c).zIndex} ${c.width}x${c.height} parent=${c.parentElement?.className}`),
 )

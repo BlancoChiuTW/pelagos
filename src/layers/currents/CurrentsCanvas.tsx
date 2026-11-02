@@ -6,6 +6,8 @@ import { mulberry32, SEED } from '../../sim/rng'
 import { ParticleField, particleCount, type Bounds } from './ParticleField'
 
 const FADE = 0.92
+/** 移動中粒子短線拉長倍數（沒有拖尾時仍看得出流向） */
+const MOVE_STREAK = 7
 const PX_PER_FRAME_AT_1MS = 0.6 // 1 m/s 的粒子每幀走幾個像素
 // 依流速分 4 段上色（批次畫，一段一次 stroke）
 const BUCKETS = [0.15, 0.4, 0.8, Infinity]
@@ -45,14 +47,20 @@ export function CurrentsCanvas({ map, canvas, grid, enabled, maxParticles }: Pro
 
     const frame = () => {
       raf = requestAnimationFrame(frame)
-      if (moving || document.hidden) return
+      if (document.hidden) return
+      // 地圖移動中：拖尾殘影會留在舊螢幕位置，所以每幀清空、粒子改畫成沿流向拉長的短線；停下後回到長拖尾
+      if (moving) field.setBounds(viewBounds(map))
       // 1 度經度在赤道上的像素數 = 512·2^z / 360
       const pxPerDeg = (512 * 2 ** map.getZoom()) / 360
       field.step(PX_PER_FRAME_AT_1MS / pxPerDeg)
-      ctx.globalCompositeOperation = 'destination-in'
-      ctx.fillStyle = `rgba(0,0,0,${FADE})`
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      ctx.globalCompositeOperation = 'source-over'
+      if (moving) clear()
+      else {
+        ctx.globalCompositeOperation = 'destination-in'
+        ctx.fillStyle = `rgba(0,0,0,${FADE})`
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.globalCompositeOperation = 'source-over'
+      }
+      const stretch = moving ? MOVE_STREAK : 1
       ctx.lineWidth = 1.4 * dpr
       for (let b = 0; b < BUCKETS.length; b++) {
         const lo = b === 0 ? 0 : BUCKETS[b - 1]
@@ -62,7 +70,7 @@ export function CurrentsCanvas({ map, canvas, grid, enabled, maxParticles }: Pro
           if (sp < lo || sp >= BUCKETS[b] || field.age[i] === 0) continue
           const p0 = map.project([field.plon[i], field.plat[i]])
           const p1 = map.project([field.lon[i], field.lat[i]])
-          ctx.moveTo(p0.x * dpr, p0.y * dpr)
+          ctx.moveTo((p1.x + (p0.x - p1.x) * stretch) * dpr, (p1.y + (p0.y - p1.y) * stretch) * dpr)
           ctx.lineTo(p1.x * dpr, p1.y * dpr)
         }
         ctx.strokeStyle = COLORS[b]
@@ -71,11 +79,11 @@ export function CurrentsCanvas({ map, canvas, grid, enabled, maxParticles }: Pro
     }
     const onStart = () => {
       moving = true
-      clear()
     }
     const onEnd = () => {
       moving = false
-      field.reseed(viewBounds(map))
+      clear() // 從乾淨畫面重新累積長拖尾；粒子不重撒，畫面連續
+      field.setBounds(viewBounds(map))
     }
     const onResize = () => {
       resize()
