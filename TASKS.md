@@ -10,8 +10,8 @@
 - [~] T02 (10fbc7c 工作流程已寫；等 Blanco 同意建公開 repo 與 push) GitHub Pages 部署：`vite.config.ts` 設 base；`.github/workflows/deploy.yml`。**建立公開 repo 與 push 要等 Blanco 同意**
 
 ## M1 P0（目標 11/02 22:00）
-- [~] Claude 18:22 F01 HUD 版面與換日線連續
-- [ ] F02 海溫圖層＋滑鼠讀值＋圖例
+- [x] F01 (2151478) HUD 版面與換日線連續
+- [~] Claude 18:35 F02 海溫圖層＋滑鼠讀值＋圖例
 - [ ] F03 洋流粒子動畫
 - [ ] S01 模擬資料：`src/sim/seed.ts` 照 PRD §4 產生 Vessel／Trip／Event／Position／Buoy（固定種子、只在海上）
 - [ ] F04 船隊圖層（自家 36 艘＋周邊 Worker 模擬）
