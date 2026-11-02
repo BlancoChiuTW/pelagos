@@ -1,8 +1,18 @@
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 10px; }
-.k { font: var(--t-caption); color: var(--label-2); }
-.v { font: var(--t-title2); font-variant-numeric: tabular-nums; margin-top: 2px; }
-.v small { font: var(--t-caption); color: var(--label-2); margin-left: 3px; }
-.bar { display: flex; height: 6px; margin: 16px 0 8px; gap: 2px; border-radius: 3px; overflow: hidden; }
-.bar > div { height: 100%; transition: flex-grow 0.6s; }
-.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font: var(--t-caption); color: var(--label-2); }
-.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
+.head { display: flex; justify-content: space-between; align-items: center; font: var(--t-headline); margin-bottom: 20px; }
+.caption { font: var(--t-caption2); color: var(--label-3); }
+.hero { display: flex; justify-content: space-between; align-items: center; }
+.k { font: var(--t-caption); color: var(--label-2); display: block; }
+.total { font: 500 44px/56px var(--font-ui); letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.total small { font: var(--t-footnote); color: var(--label-3); letter-spacing: 0; margin-left: 8px; }
+.alert { border: 1px solid #f28d9618; border-radius: 12px; background: #f28d9608; padding: 10px 14px; cursor: pointer; text-align: left; }
+.alert:hover { background: #f28d9618; }
+.alert strong { display: block; font: 500 26px/32px var(--font-ui); color: var(--red); font-variant-numeric: tabular-nums; }
+.bar { display: flex; height: 4px; margin: 18px 0 12px; gap: 3px; border-radius: 3px; overflow: hidden; }
+.bar > div { height: 100%; transition: flex-grow .6s; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font: var(--t-caption2); color: var(--label-2); }
+.legend i { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+.metrics { display: grid; grid-template-columns: 1fr 1fr; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--sep); gap: 14px; }
+.metrics button { text-align: left; border: 0; border-radius: 8px; background: none; cursor: pointer; padding: 4px; }
+.metrics button:hover { background: var(--fill); }
+.metrics b { display: block; margin-top: 5px; font: 500 22px/28px var(--font-ui); font-variant-numeric: tabular-nums; }
+.metrics small { margin-left: 6px; font: var(--t-caption); color: var(--label-3); }

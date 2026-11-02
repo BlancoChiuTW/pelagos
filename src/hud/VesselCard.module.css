@@ -1,4 +1,12 @@
-.card { display: flex; flex-direction: column; gap: 10px; max-height: 100%; overflow: hidden; }
+.card { display: flex; flex-direction: column; gap: 16px; max-height: 100%; overflow-y: auto; }
+.card > * { flex-shrink: 0; }
+.card > :last-child { flex-shrink: 1; min-height: 180px; }
+.back { text-align: left; border: 0; background: none; color: var(--label-2); padding: 0 0 4px; font: var(--t-caption); cursor: pointer; }
+.back:hover { color: var(--tint); }
+.actions { display: flex; gap: 8px; }
+.actions button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 6px; border: 1px solid var(--sep); border-radius: 9px; background: var(--fill); color: var(--label-2); font: var(--t-footnote); cursor: pointer; }
+.actions button.primary { background: var(--tint); color: #0a2428; border-color: var(--tint); font-weight: 600; }
+.actions svg { width: 16px; height: 16px; }
 .head { display: flex; align-items: flex-start; gap: 10px; }
 .name { font: var(--t-title2); }
 .meta { margin-top: 2px; font: var(--t-footnote); color: var(--label-2); }
@@ -12,5 +20,5 @@
 .sep { height: 1px; background: var(--line); }
 .fuel { height: 4px; border-radius: 2px; overflow: hidden; background: var(--fill); margin-top: 6px; }
 .fuel > div { height: 100%; }
-.replay { height: 34px; border: 0; border-radius: 9px; background: var(--fill); color: var(--tint); font: 600 15px/20px var(--font-ui); cursor: pointer; }
+.replay { min-height: 34px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 9px; background: transparent; color: var(--label-2); font: var(--t-footnote); cursor: pointer; }
 .replay:hover { background: rgba(120,120,128,.36); }

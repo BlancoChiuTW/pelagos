@@ -23,6 +23,10 @@ node scripts/shot.mjs http://localhost:4173/pelagos/ /tmp/pelagos.png 11000
 
 截圖需本機 Playwright 快取的 Chromium，見 [shot.mjs](scripts/shot.mjs)。產物在 dist/，子路徑為 /pelagos/。外部底圖仍需網路；完整離線與自動降級尚未完成。
 
+V04 介面更新採深藍工作區與青綠重點色，統一六頁導覽、表格與詳情面板；管理頁隱藏地圖但保留相機。Ctrl／⌘ K 可搜尋船舶，方向鍵選結果、Enter 定位、Escape 關閉選單。地圖、船舶主檔與航次共用選船狀態；航次補登按需展開，輸入錯誤與完成狀態有明確回饋。
+
+本機 preview 啟動後，可執行 `node scripts/ux-check.mjs` 做瀏覽器互動回歸。腳本使用獨立瀏覽器 context，驗證搜尋、跨頁選船、事件補登、主檔保存、警示、圖層、回放及 1600／1280／1024 桌面版面；截圖與結果預設寫入 `/tmp/pelagos-ux/`。不會修改使用者平常瀏覽器的資料。
+
 ## 已實作流程
 
 | 模組 | 展示內容 |

@@ -8,6 +8,7 @@ import { fmtDate, VESSEL_TYPE_LABEL } from '../sim/labels'
 import { useStore } from '../store'
 import { Panel } from './Panel'
 import { TripTimeline } from './TripTimeline'
+import { Icon } from './icons'
 import s from './VesselCard.module.css'
 
 const STATUS_VAR = { fishing: 'var(--ok)', transit: 'var(--accent)', drifting: 'var(--text-dim)', in_port: 'var(--text)', signal_lost: 'var(--alert)' } as const
@@ -27,6 +28,7 @@ export function VesselCard({ item, events, grid, onEvent }: Props) {
   return (
     <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }} transition={{ duration: 0.2 }} style={{ height: '100%', display: 'flex' }}>
       <Panel className={s.card} style={{ flex: 1 }}>
+        <button className={s.back} onClick={() => select(null)}>← 返回船隊總覽</button>
         <div className={s.head}>
           <div>
             <div className={s.name}>{vessel.name}</div>
@@ -62,7 +64,11 @@ export function VesselCard({ item, events, grid, onEvent }: Props) {
             <div className={s.fuel}><div style={{ width: `${fuel}%`, background: fuelVar }} /></div>
           </div>
         </div>
-        <button className={s.replay} onClick={() => { const st = useStore.getState(); st.setReplayOpen(true); st.setScrub(st.time.now - 24 * 3_600_000); st.play() }}>回放這艘船過去 24 小時航跡</button>
+        <div className={s.actions}>
+          <button className={s.primary} onClick={() => useStore.getState().setView('trips')}>{Icon.route}查看航次</button>
+          <button onClick={() => useStore.getState().setView('vessels')}>船舶主檔 ↗</button>
+        </div>
+        <button className={s.replay} onClick={() => { const st = useStore.getState(); st.setReplayOpen(true); st.setScrub(st.time.now - 24 * 3_600_000); st.play() }}>{Icon.replay}回放過去 24 小時航跡</button>
         <div className={s.sep} />
         <TripTimeline events={events} onEvent={onEvent} />
       </Panel>

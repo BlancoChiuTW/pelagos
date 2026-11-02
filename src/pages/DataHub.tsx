@@ -1,5 +1,5 @@
 // 資料串接（M03）：連線清單（像 HIS 的介面引擎）＋檔案匯入（預覽 → 欄位對應 → 上地圖）
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { encodeFlux, encodeNaf, encodeVendorA, encodeVendorB, parseBuoy, parseFlux, parseNaf } from '../data/interfaces/formats'
 import type { FleetItem } from '../data/useFleet'
 import { buoyFrame } from '../layers/buoys'
@@ -21,13 +21,13 @@ const day = (iso?: string) => (iso ? iso.slice(0, 10) : '—')
 type Key = 'noaa' | 'vms' | 'fad' | 'elog'
 function Connector({ name, kind, status, rows, active, onClick }: { name: string; kind: string; status: [string, string]; rows: [string, string][]; active: boolean; onClick: () => void }) {
   return (
-    <div onClick={onClick} style={{ padding: 14, borderRadius: 12, cursor: 'pointer', background: active ? 'rgba(100,210,255,.10)' : 'rgba(255,255,255,.04)', border: `0.5px solid ${active ? 'var(--tint)' : 'var(--sep)'}` }}>
+    <div role="button" tabIndex={0} aria-pressed={active} aria-label={name} onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }} style={{ padding: 18, borderRadius: 12, cursor: 'pointer', background: active ? 'rgba(125,219,211,.06)' : 'rgba(255,255,255,.02)', border: `1px solid ${active ? 'rgba(125,219,211,.4)' : 'var(--sep)'}` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <b style={{ font: 'var(--t-headline)' }}>{name}</b>
         <span className={s.chip} style={{ color: status[1], marginLeft: 'auto' }}>{status[0]}</span>
       </div>
       <div className={s.dim} style={{ marginBottom: 8 }}>{kind}</div>
-      <dl className={s.kv}>{rows.map(([k, v]) => <><dt key={k}>{k}</dt><dd key={`${k}v`}>{v}</dd></>)}</dl>
+      <dl className={s.kv}>{rows.map(([k, v]) => <Fragment key={k}><dt>{k}</dt><dd>{v}</dd></Fragment>)}</dl>
     </div>
   )
 }
@@ -121,8 +121,8 @@ export function DataHub({ grid, snap, now, fleet, trackStart }: { grid: OceanGri
   return (
     <div className={s.page}>
       <Panel className={s.main} style={{ overflowY: 'auto' }}>
-        <div className={s.head}><div><h1 className={s.h1}>資料串接</h1><div className={s.sub}>外部資料源的連線狀態；正式版由後端收集服務寫入 PostgreSQL＋PostGIS</div></div></div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
+        <div className={s.head}><div><h1 className={s.h1}>資料串接</h1><div className={s.sub}>檢視來源、驗證回報，將不同格式的資料匯入同一張地圖。</div></div></div>
+        <div className={s.connectors}>
           <Connector active={active === 'noaa'} onClick={() => setActive('noaa')} name="NOAA 海況" kind="海溫 OISST v2.1 · 洋流 NESDIS SSH · ERDDAP" status={['已同步', 'var(--green)']}
             rows={[['海溫資料日', day(grid?.meta.sst.time)], ['洋流資料日', day(grid?.meta.u.time)], ['更新方式', '每日排程（GitHub Actions 跑 Python ETL）'], ['格式', 'Int16 網格＋PNG，跨換日線']]} />
           <Connector active={active === 'vms'} onClick={() => setActive('vms')} name="VMS 船位" kind="衛星船位回報（模擬）" status={['接收中', 'var(--green)']}
@@ -171,7 +171,7 @@ export function DataHub({ grid, snap, now, fleet, trackStart }: { grid: OceanGri
               </table>
             </div>
             <div className={s.section}>欄位對應</div>
-            <div className={s.sub} style={{ marginBottom: 10 }}>把檔案的欄位對到系統欄位（像 FHIR mapping：來源格式不一，先對應再入庫）</div>
+            <div className={s.sub} style={{ marginBottom: 10 }}>確認經緯度與名稱欄位，預覽資料後再加入地圖。</div>
             <div className={s.form} style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>{sel('lon', '經度 *')}{sel('lat', '緯度 *')}{sel('label', '名稱')}{sel('value', '數值')}</div>
             <div className={s.actions}><button className={`${s.btn} ${s.primary}`} onClick={commit}>加入地圖</button><button className={s.btn} onClick={() => setFile(null)}>取消</button></div>
           </>

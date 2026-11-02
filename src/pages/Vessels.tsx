@@ -18,7 +18,9 @@ export function Vessels({ fleet, now }: { fleet: FleetItem[]; now: number }) {
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
   const [sort, setSort] = useState<{ col: Col; dir: 1 | -1 }>({ col: 'name', dir: 1 })
-  const [sel, setSel] = useState<string | null>(fleet[0]?.vessel.id ?? null)
+  const selected = useStore((st) => st.selectedVesselId)
+  const setSel = useStore((st) => st.selectVessel)
+  const sel = selected ?? fleet[0]?.vessel.id ?? null
   const rows = useMemo(() => {
     const key = (f: FleetItem): string | number =>
       ({ name: f.vessel.name, status: f.status, days: f.trip.summary.days, catch: f.trip.summary.catchTons, fuel: f.trip.summary.fuelPct, last: f.track.at(-1)?.at ?? 0 })[sort.col]
@@ -28,8 +30,8 @@ export function Vessels({ fleet, now }: { fleet: FleetItem[]; now: number }) {
       .sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : 0) * sort.dir)
   }, [fleet, q, filter, sort])
   const th = (col: Col, label: string) => (
-    <th onClick={() => setSort((p) => ({ col, dir: p.col === col ? ((-p.dir) as 1 | -1) : 1 }))}>
-      {label}{sort.col === col ? (sort.dir === 1 ? ' ▲' : ' ▼') : ''}
+    <th aria-sort={sort.col === col ? (sort.dir === 1 ? 'ascending' : 'descending') : 'none'}>
+      <button onClick={() => setSort((p) => ({ col, dir: p.col === col ? ((-p.dir) as 1 | -1) : 1 }))}>{label}{sort.col === col ? (sort.dir === 1 ? ' ↑' : ' ↓') : ''}</button>
     </th>
   )
   const item = fleet.find((f) => f.vessel.id === sel) ?? null
@@ -44,7 +46,7 @@ export function Vessels({ fleet, now }: { fleet: FleetItem[]; now: number }) {
               <button key={k} aria-pressed={filter === k} onClick={() => setFilter(k)}>{l}</button>
             ))}
           </div>
-          <input className={s.search} placeholder="搜尋船名或編號" value={q} onChange={(e) => setQ(e.target.value)} />
+          <input className={s.search} aria-label="篩選船舶表格" placeholder="搜尋船名或編號" value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
         <div className={s.scroll}>
           <table className={s.table}>
@@ -52,7 +54,7 @@ export function Vessels({ fleet, now }: { fleet: FleetItem[]; now: number }) {
             <tbody>
               {rows.map((f) => (
                 <tr key={f.vessel.id} aria-selected={f.vessel.id === sel} onClick={() => setSel(f.vessel.id)}>
-                  <td><b>{f.vessel.name}</b> <span className={s.dim}>{f.vessel.id}</span></td>
+                  <td><button className={s.rowButton} onClick={() => setSel(f.vessel.id)} aria-label={`編輯 ${f.vessel.name}`}><b>{f.vessel.name}</b><span className={s.dim}>{f.vessel.id}</span></button></td>
                   <td className={s.dim}>{VESSEL_TYPE_LABEL[f.vessel.type]}</td>
                   <td><span className={s.chip} style={{ color: STATUS_VAR[f.status] }}>{STATUS_LABEL[f.status]}</span></td>
                   <td className={s.dim}>{fmtLat(f.pose.lat, 1)} {fmtLon(f.pose.lon, 1)}</td>
@@ -64,8 +66,9 @@ export function Vessels({ fleet, now }: { fleet: FleetItem[]; now: number }) {
               ))}
             </tbody>
           </table>
-          {!rows.length && <div className={s.empty}>沒有符合的船</div>}
+          {!rows.length && <div className={s.empty}>沒有符合條件的船舶<div className={s.actions} style={{ justifyContent: 'center' }}><button className={s.btn} onClick={() => { setQ(''); setFilter('all') }}>清除篩選</button></div></div>}
         </div>
+        <div className={s.footer}><span>顯示 {rows.length} / {fleet.length} 艘船舶</span><span>主檔變更儲存於此瀏覽器</span></div>
       </Panel>
       <Panel className={s.side}>{item ? <ProfileEditor key={item.vessel.id} item={item} /> : <div className={s.empty}>選一艘船</div>}</Panel>
     </div>
@@ -95,7 +98,7 @@ function ProfileEditor({ item }: { item: FleetItem }) {
       <div className={s.actions}>
         <button className={`${s.btn} ${s.primary}`} onClick={() => { save(item.vessel.id, draft); setOk(true) }}>儲存</button>
         <button className={s.btn} onClick={() => { setView('map'); select(item.vessel.id) }}>在地圖上檢視</button>
-        {ok && <span className={s.toast}>已儲存</span>}
+        {ok && <span className={s.toast} role="status">已儲存至此瀏覽器</span>}
       </div>
       <div className={s.section}>本航次</div>
       <dl className={s.kv}>

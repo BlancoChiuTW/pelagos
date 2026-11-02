@@ -25,6 +25,7 @@ import { VesselCard } from './hud/VesselCard'
 import { PerfHud, useFps } from './hud/PerfHud'
 import { TimeBar } from './hud/TimeBar'
 import { FleetList } from './hud/FleetList'
+import { MapControls } from './hud/MapControls'
 import { BootSequence } from './hud/BootSequence'
 import { Placeholder } from './pages/Placeholder'
 import { Vessels } from './pages/Vessels'
@@ -136,11 +137,14 @@ export default function App() {
 
   return (
     <>
-      <MapView layers={layers} getTooltip={tooltip} onReady={setHandles} />
+      <div style={{ position: 'absolute', inset: 0, opacity: onMap ? 1 : 0, visibility: onMap ? 'visible' : 'hidden' }}>
+        <MapView layers={layers} getTooltip={tooltip} onReady={setHandles} />
+      </div>
       {h && grid && <CurrentsCanvas map={h.map} canvas={h.fxCanvas} grid={grid} enabled={rawFlags.currents && stage >= 2 && onMap} maxParticles={fxLow ? 3000 : 6000} />}
       <div style={{ opacity: stage >= 5 ? 1 : 0, transition: 'opacity 0.6s', position: 'absolute', inset: 0, pointerEvents: 'none' }}>
         <Sidebar alerts={alertCount} />
-        {onMap && <Toolbar fleet={fleet} layers={<LayerPanel />} info={<InfoPanel grid={grid} />} />}
+        {onMap && <MapControls map={h?.map ?? null} />}
+        <Toolbar key={view} fleet={fleet} layers={<LayerPanel />} info={<InfoPanel grid={grid} />} />
         <Hud
           page={onMap ? undefined : view === 'vessels' ? <Vessels fleet={fleet} now={t} /> : view === 'trips' && snap ? <Trips fleet={fleet} snap={snap} now={t} onEvent={goEvent} />
               : view === 'alerts' ? <Alerts alerts={alerts} onLocate={locateAlert} />

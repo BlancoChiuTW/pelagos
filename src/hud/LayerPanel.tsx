@@ -22,8 +22,8 @@ export function LayerPanel() {
         <div key={g.title}>
           <div className={s.group}>{g.title}</div>
           {g.items.map((it) => (
-            <button key={it.key} className={s.item} aria-pressed={layers[it.key]} onClick={() => onClick(it.key)}>
-              {it.label}<span className={s.switch} />
+            <button key={it.key} className={s.item} disabled={it.key === 'hotspot'} aria-pressed={layers[it.key]} onClick={() => onClick(it.key)}>
+              {it.label}{it.key === 'hotspot' ? <small>規劃中</small> : <span className={s.switch} />}
             </button>
           ))}
         </div>

@@ -1,0 +1,15 @@
+.caption { position: absolute; top: 120px; left: calc(var(--workspace-left) + 20px); pointer-events: none; z-index: 1; }
+.eyebrow { font: 500 9px/16px var(--font-ui); letter-spacing: .22em; color: var(--tint); }
+.caption h1 { font: 500 26px/38px var(--font-ui); letter-spacing: .02em; margin: 10px 0 6px; text-shadow: 0 2px 16px #08121d; }
+.caption p { font: var(--t-footnote); color: var(--label-2); margin: 0 0 18px; }
+.tag { display: inline-flex; align-items: center; gap: 10px; font: var(--t-caption2); color: #bdd0dc; background: #0c1824bb; border: 1px solid var(--sep); border-radius: 20px; padding: 6px 12px; }
+.tag i { width: 3px; height: 3px; background: var(--label-3); border-radius: 50%; }
+.controls { position: absolute; right: calc(var(--context-width) + 40px); bottom: 134px; display: flex; flex-direction: column; background: var(--material); border: 1px solid var(--sep); border-radius: 12px; padding: 4px; pointer-events: auto; z-index: 3; }
+.controls button { width: 34px; height: 34px; border: 0; border-radius: 7px; background: none; color: var(--label-2); display: grid; place-items: center; cursor: pointer; font-size: 22px; }
+.controls button:hover { background: var(--fill); color: var(--tint); }
+.controls svg { width: 17px; height: 17px; }
+.controls > span { height: 1px; margin: 4px; background: var(--sep); }
+.hint { position: absolute; bottom: 22px; left: calc(var(--workspace-left) + 62px); font: var(--t-caption2); color: var(--label-3); pointer-events: none; }
+.hint span { margin: 0 8px; }
+@media (max-width: 1100px) { .caption h1 { font-size: 22px; } .caption p { display: none; } .hint { display: none; } }
+@media (max-height: 700px) { .caption { top: 110px; } .caption h1 { font-size: 20px; margin: 4px 0; } .caption p, .tag { display: none; } }

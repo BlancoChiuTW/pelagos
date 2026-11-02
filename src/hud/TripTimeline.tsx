@@ -21,7 +21,8 @@ export function TripTimeline({ events, onEvent }: { events: TripEvent[]; onEvent
       <div className={s.title}><span>航次時間軸</span><em>TRIP LOG · {events.length}</em></div>
       <motion.ul className={s.list} initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.025 } } }}>
         {list.map((e) => (
-          <motion.li key={e.id} className={s.row} onClick={() => onEvent(e)}
+          <motion.li key={e.id} className={s.row} role="button" tabIndex={0} aria-label={`${fmtTime(e.at)} ${EVENT_LABEL[e.type]}，在地圖查看`} onClick={() => onEvent(e)}
+            onKeyDown={(key) => { if (key.key === 'Enter' || key.key === ' ') { key.preventDefault(); onEvent(e) } }}
             variants={{ hidden: { opacity: 0, x: 8 }, show: { opacity: 1, x: 0 } }}>
             <span className={s.time}>{fmtTime(e.at)}</span>
             <span className={s.dot} style={{ color: EVENT_VAR[e.type] }} />

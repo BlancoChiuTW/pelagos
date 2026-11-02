@@ -10,6 +10,16 @@
 html, body, #root { margin: 0; height: 100%; background: var(--bg); color: var(--label); font: var(--t-subhead); }
 body { overflow: hidden; -webkit-font-smoothing: antialiased; letter-spacing: -0.01em; }
 button { font: inherit; color: inherit; }
+button, input, select, textarea, a { -webkit-tap-highlight-color: transparent; }
+button { transition: background .16s, color .16s, border-color .16s, box-shadow .16s; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+:focus-visible { outline: 2px solid var(--tint); outline-offset: 3px; }
+input::placeholder { color: var(--label-3); }
+select option { background: var(--material-thick); }
+* { scrollbar-width: thin; scrollbar-color: #344956 transparent; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
 .num { font-variant-numeric: tabular-nums; letter-spacing: 0; }
 .maplibregl-ctrl-attrib { background: rgba(0, 0, 0, 0.4) !important; color: var(--label-3); font-size: 10px; }
 .maplibregl-ctrl-attrib a { color: var(--label-3) !important; }

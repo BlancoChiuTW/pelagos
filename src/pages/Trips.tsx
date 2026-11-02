@@ -7,6 +7,7 @@ import type { FleetItem } from '../data/useFleet'
 import { DAY } from '../sim/geo'
 import { EVENT_LABEL, fmtDate, VESSEL_TYPE_LABEL } from '../sim/labels'
 import { STATUS_LABEL } from '../sim/status'
+import { useStore } from '../store'
 import { Panel } from '../hud/Panel'
 import { TripTimeline } from '../hud/TripTimeline'
 import { STATUS_VAR } from './common'
@@ -41,11 +42,14 @@ function AddEvent({ item, now }: { item: FleetItem; now: number }) {
   const local = new Date(now + TPE).toISOString().slice(0, 16)
   const [f, setF] = useState({ type: 'set' as EventType, at: local, lat: item.pose.lat.toFixed(3), lon: item.pose.lon.toFixed(3), tons: '30', port: '', counterpart: '', note: '' })
   const [ok, setOk] = useState(false)
-  const up = (k: keyof typeof f, v: string) => { setOk(false); setF({ ...f, [k]: v }) }
+  const [error, setError] = useState('')
+  const up = (k: keyof typeof f, v: string) => { setOk(false); setError(''); setF({ ...f, [k]: v }) }
   const submit = () => {
     const at = Date.parse(`${f.at}:00Z`) - TPE
     const lat = Number(f.lat), lon = normLon(Number(f.lon))
-    if (!Number.isFinite(at) || !Number.isFinite(lat) || !Number.isFinite(lon)) return
+    if (!Number.isFinite(at)) return setError('請填寫有效的事件時間。')
+    if (!f.lat.trim() || !f.lon.trim() || !Number.isFinite(lat) || Math.abs(lat) > 90 || !Number.isFinite(lon) || Number(f.lon) < 0 || Number(f.lon) > 360) return setError('請輸入有效座標：緯度 −90～90、經度 0～360。')
+    if ((f.type === 'set' || f.type === 'transship') && (!f.tons.trim() || !Number.isFinite(Number(f.tons)) || Number(f.tons) < 0)) return setError('漁獲量需為零或正數。')
     add({
       id: `U${Date.now()}`, tripId: item.trip.id, vesselId: item.vessel.id, at, type: f.type, lon, lat,
       detail: { catchTons: f.type === 'set' || f.type === 'transship' ? Number(f.tons) || 0 : undefined, port: f.port || undefined, counterpart: f.counterpart || undefined, note: f.note ? `${f.note}（手動登錄）` : '手動登錄' },
@@ -65,28 +69,31 @@ function AddEvent({ item, now }: { item: FleetItem; now: number }) {
         <label className={`${s.field} ${s.full}`}>備註<input value={f.note} onChange={(e) => up('note', e.target.value)} /></label>
       </div>
       <div className={s.actions}>
-        <button className={`${s.btn} ${s.primary}`} onClick={submit}>新增事件</button>
-        {ok && <span className={s.toast}>已新增，地圖與時間軸已更新</span>}
+        <button className={`${s.btn} ${s.primary}`} disabled={ok} onClick={submit}>{ok ? '已加入航次' : '新增事件'}</button>
+        {ok && <span className={s.toast} role="status">已新增，地圖與時間軸已更新</span>}
       </div>
+      {error && <div className={s.error} role="alert">{error}</div>}
     </div>
   )
 }
 
 export function Trips({ fleet, snap, now, onEvent }: { fleet: FleetItem[]; snap: FleetSnapshot; now: number; onEvent: (e: TripEvent) => void }) {
-  const [sel, setSel] = useState<string | null>(fleet[0]?.vessel.id ?? null)
+  const selected = useStore((st) => st.selectedVesselId)
+  const setSel = useStore((st) => st.selectVessel)
+  const sel = selected ?? fleet[0]?.vessel.id ?? null
   const item = fleet.find((f) => f.vessel.id === sel) ?? null
   const events = useMemo(() => (item ? snap.events.filter((e) => e.tripId === item.trip.id) : []), [snap, item])
   return (
     <div className={s.page}>
       <Panel className={s.main}>
-        <div className={s.head}><div><h1 className={s.h1}>航次管理</h1><div className={s.sub}>每趟航次＝一段「病程」：事件依時間記錄，可手動補登</div></div></div>
+        <div className={s.head}><div><h1 className={s.h1}>航次紀錄</h1><div className={s.sub}>從出港到返港，追蹤每趟航程的作業與漁獲。</div></div></div>
         <div className={s.scroll}>
           <table className={s.table}>
             <thead><tr><th>船名</th><th>出港</th><th>天數</th><th>狀態</th><th>下網</th><th>艙內漁獲</th><th>事件數</th></tr></thead>
             <tbody>
               {fleet.map((f) => (
                 <tr key={f.trip.id} aria-selected={f.vessel.id === sel} onClick={() => setSel(f.vessel.id)}>
-                  <td><b>{f.vessel.name}</b> <span className={s.dim}>{VESSEL_TYPE_LABEL[f.vessel.type]}</span></td>
+                  <td><button className={s.rowButton} onClick={() => setSel(f.vessel.id)} aria-label={`查看 ${f.vessel.name} 航次`}><b>{f.vessel.name}</b><span className={s.dim}>{VESSEL_TYPE_LABEL[f.vessel.type]}</span></button></td>
                   <td className={s.dim}>{fmtDate(f.trip.departedAt)} {f.trip.departPort}</td>
                   <td>{f.trip.summary.days} 天</td>
                   <td><span className={s.chip} style={{ color: STATUS_VAR[f.status] }}>{STATUS_LABEL[f.status]}</span></td>
@@ -104,9 +111,7 @@ export function Trips({ fleet, snap, now, onEvent }: { fleet: FleetItem[]; snap:
           <>
             <div className={s.section}>{item.vessel.name} · 本航次</div>
             {item.vessel.type === 'purse_seiner' && <><div className={s.sub} style={{ marginBottom: 6 }}>近 30 天每日漁獲（噸）</div><DailyCatch events={events} now={now} /></>}
-            <div className={s.section}>新增事件</div>
-            <AddEvent key={item.vessel.id} item={item} now={now} />
-            <div className={s.section} />
+            <details key={item.vessel.id} className={s.disclosure}><summary>＋ 補登航次事件</summary><AddEvent item={item} now={now} /></details>
             <div style={{ flex: 1, minHeight: 260, display: 'flex' }}><TripTimeline events={events} onEvent={onEvent} /></div>
           </>
         ) : <div className={s.empty}>選一趟航次</div>}

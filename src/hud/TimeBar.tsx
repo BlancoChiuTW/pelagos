@@ -45,7 +45,7 @@ export function TimeBar({ live }: { live: number }) {
       </button>
       <div className={s.mid}>
         <div className={s.labels}><span>24 小時前</span><span className={s.now}>{fmtTime(t)} TPE</span><span>現在</span></div>
-        <input className={s.range} type="range" min={start} max={live} step={60_000} value={t}
+        <input className={s.range} aria-label="回放時間" type="range" min={start} max={live} step={60_000} value={t}
           onChange={(e) => { pause(); const v = Number(e.target.value); setScrub(v >= live - 60_000 ? null : v) }} />
       </div>
       <button className={s.speed} onClick={() => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length])}>{speed} 分/秒</button>
