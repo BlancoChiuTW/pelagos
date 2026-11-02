@@ -21,7 +21,7 @@ PELAGOS：遠洋船隊戰情儀表板（面試展示用 demo）。規格在 `doc
 背景：Claude 與 Codex 都是 Plus 方案，額度有限。由 Blanco 決定現在輪到誰；**同一時間只有一個 AI 在動手**。
 
 1. **開工**：讀 HANDOFF.md → 讀 TASKS.md → 找第一個 `[ ]`，改成 `[~] 你的名字 HH:MM`。只讀這項會碰到的檔案。
-2. **做完一項**：`npm run verify` 必須通過 → TASKS.md 改 `[x]` 並附 commit 短碼 → `git commit -m "[任務ID] 摘要"` → 更新本檔「現況」。
+2. **做完一項**：`npm run verify` 必須通過 → TASKS.md 改 `[x]` 並附 commit 短碼 → `git commit -m "[任務ID] 摘要"` → 更新本檔「現況」→ `./scripts/sync-vault.sh`（同步給 Blanco 的 Obsidian）。
 3. **額度快用完／要停手**：不管做到哪，立刻 `git commit -m "[任務ID] WIP: 做到哪"`，並在本檔「現況」寫清楚：做到哪、下一步是什麼、哪裡有坑。**沒寫交接就停手，等於這段白做。**
 4. **不擴大範圍**：PRD 沒寫的功能不做；覺得 PRD 有問題，寫在「待 Blanco 決定」。
 5. **不推送**：`git push`、建立 GitHub repo、部署，一律等 Blanco 說可以。

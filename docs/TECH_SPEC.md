@@ -14,7 +14,7 @@
 | 底圖 | maplibre-gl 6.16 | |
 | 圖層 | deck.gl 9.4（core／layers／aggregation-layers／geo-layers／mapbox） | |
 | 狀態 | zustand 5 | |
-| 介面動畫 | motion 12 | 面板進出場、數字跳動、依序浮現（X06、X07） |
+| 介面動畫 | motion 14 | 面板進出場、數字跳動、依序浮現（X06、X07） |
 | 編排動畫 | gsap 3 | 開機序列與導覽的時間軸（X01、F17）；GSAP 標準免費授權 |
 | 後製 | @luma.gl/effects 9.4 | deck.gl 後製濾鏡（暗角等，X10），版本須與 deck.gl 的 luma 一致 |
 | 測試 | vitest | 只測純函式（§11） |
