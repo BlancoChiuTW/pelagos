@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import { MapboxOverlay } from '@deck.gl/mapbox'
 import type { Layer } from '@deck.gl/core'
-import { BASEMAP_STYLE, DEFAULT_VIEW } from './camera'
+import { BASEMAP_STYLE, INTRO_START } from './camera'
 // MapLibre 6 用 import.meta.url 找 worker，打包後找不到 → 用 Vite ?url 把 worker 檔當資產輸出再指定
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 
@@ -30,8 +30,8 @@ export function MapView({ layers, onReady }: Props) {
     const map = new maplibregl.Map({
       container: el.current,
       style: BASEMAP_STYLE,
-      center: DEFAULT_VIEW.center,
-      zoom: DEFAULT_VIEW.zoom,
+      center: INTRO_START.center, // 開機序列從高空俯衝到 DEFAULT_VIEW（X01）
+      zoom: INTRO_START.zoom,
       renderWorldCopies: true,
       attributionControl: { compact: true },
     })

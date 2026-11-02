@@ -17,6 +17,8 @@ export interface AppState {
   time: { now: Epoch; cursor: Epoch; playing: boolean; speed: Speed }
   online: boolean
   intro: 'pending' | 'playing' | 'done'
+  /** 開機序列進度：0 全暗 → 1 海溫 → 2 洋流 → 3 浮標 → 4 船隊 → 5 HUD（X01） */
+  introStage: number
   tour: { active: boolean; step: number }
   fx: { quality: FxQuality; auto: boolean; buoyMode: 'points' | 'columns' }
 
@@ -30,6 +32,7 @@ export interface AppState {
   setSpeed: (s: Speed) => void
   setOnline: (on: boolean) => void
   setIntro: (s: AppState['intro']) => void
+  setIntroStage: (n: number) => void
   setTour: (t: Partial<AppState['tour']>) => void
   setFx: (f: Partial<AppState['fx']>) => void
 }
@@ -41,6 +44,7 @@ export const useStore = create<AppState>()((set) => ({
   time: { now: loadNow, cursor: loadNow, playing: false, speed: 10 },
   online: typeof navigator === 'undefined' ? true : navigator.onLine,
   intro: 'pending',
+  introStage: 0,
   tour: { active: false, step: 0 },
   fx: { quality: 'high', auto: true, buoyMode: 'points' },
 
@@ -54,6 +58,7 @@ export const useStore = create<AppState>()((set) => ({
   setSpeed: (speed) => set((s) => ({ time: { ...s.time, speed } })),
   setOnline: (online) => set({ online }),
   setIntro: (intro) => set({ intro }),
+  setIntroStage: (introStage) => set({ introStage }),
   setTour: (t) => set((s) => ({ tour: { ...s.tour, ...t } })),
   setFx: (f) => set((s) => ({ fx: { ...s.fx, ...f } })),
 }))

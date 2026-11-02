@@ -22,6 +22,8 @@ import type { TripEvent } from './data/types'
 import { KpiWall } from './hud/KpiWall'
 import { PerfHud, useFps } from './hud/PerfHud'
 import { SourceBadge } from './hud/SourceBadge'
+import { BootSequence } from './hud/BootSequence'
+import { useCallback } from 'react'
 
 export default function App() {
   const [h, setHandles] = useState<MapHandles | null>(null)
@@ -31,17 +33,25 @@ export default function App() {
   const showCurrents = useStore((s) => s.layers.currents)
   const fxLow = useStore((s) => s.fx.quality === 'low')
   const grid = ocean.state === 'ok' ? ocean.data : null
+  const rawFlags = useStore((s) => s.layers)
+  const stage = useStore((s) => s.introStage)
+  const intro = useStore((s) => s.intro)
+  const setIntro = useStore((s) => s.setIntro)
+  // 開機序列：依進度逐層點亮（X01）
+  const layerFlags = useMemo(
+    () => ({ ...rawFlags, buoys: rawFlags.buoys && stage >= 3, others: rawFlags.others && stage >= 4, fleet: rawFlags.fleet && stage >= 4, track: rawFlags.track && stage >= 4 }),
+    [rawFlags, stage],
+  )
 
   useEffect(() => {
     if (h && grid) mountOceanRasters(h.map, grid)
   }, [h, grid])
   useEffect(() => {
     if (!h || !grid) return
-    setRasterVisible(h.map, 'sst', showSst)
-    setRasterVisible(h.map, 'anomaly', showAnom, 0.8)
-  }, [h, grid, showSst, showAnom])
+    setRasterVisible(h.map, 'sst', showSst && stage >= 1)
+    setRasterVisible(h.map, 'anomaly', showAnom && stage >= 1, 0.8)
+  }, [h, grid, showSst, showAnom, stage])
 
-  const layerFlags = useStore((s) => s.layers)
   const othersCount = useStore((s) => s.othersCount)
   const selectedId = useStore((s) => s.selectedVesselId)
   const selectVessel = useStore((s) => s.selectVessel)
@@ -72,10 +82,18 @@ export default function App() {
     () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel }),
     [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel],
   )
+  const introDone = useCallback(() => setIntro('done'), [setIntro])
+  const bootSteps = [
+    { label: '海況網格（NOAA）', ok: grid !== null },
+    { label: '船隊／航次／浮標', ok: snap !== null },
+    { label: '底圖與圖層引擎', ok: h !== null },
+  ]
+
   return (
     <>
       <MapView layers={layers} onReady={setHandles} />
-      {h && grid && <CurrentsCanvas map={h.map} canvas={h.fxCanvas} grid={grid} enabled={showCurrents} maxParticles={fxLow ? 3000 : 8000} />}
+      {h && grid && <CurrentsCanvas map={h.map} canvas={h.fxCanvas} grid={grid} enabled={showCurrents && stage >= 2} maxParticles={fxLow ? 3000 : 8000} />}
+      <div style={{ opacity: stage >= 5 ? 1 : 0, transition: 'opacity 0.6s', position: 'absolute', inset: 0, pointerEvents: 'none' }}>
       <Hud
         left={<><LayerPanel /><SourceBadge grid={grid} error={ocean.state === 'error' ? ocean.error : undefined} /></>}
         right={snap ? <KpiWall fleet={fleet} snap={snap} alerts={alertCount} now={t} /> : undefined}
@@ -88,6 +106,8 @@ export default function App() {
           </>
         }
       />
+      </div>
+      {intro !== 'done' && <BootSequence map={h?.map ?? null} steps={bootSteps} onDone={introDone} />}
     </>
   )
 }

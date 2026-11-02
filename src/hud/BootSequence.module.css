@@ -1,0 +1,13 @@
+.overlay { position: absolute; inset: 0; z-index: 10; background: #020407; display: flex; align-items: center; justify-content: center; }
+.box { width: 420px; font-family: var(--font-num); }
+.logo { font-size: 34px; font-weight: 600; letter-spacing: 0.5em; color: var(--accent); text-shadow: 0 0 18px rgba(57, 213, 255, 0.6); min-height: 44px; }
+.sub { margin-top: 6px; font-family: var(--font-ui); font-size: 13px; color: var(--text-dim); letter-spacing: 0.12em; min-height: 18px; }
+.lines { margin-top: 26px; display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.line { display: flex; align-items: center; gap: 10px; color: var(--text-dim); }
+.line[data-ok='true'] { color: var(--text); }
+.mark { width: 14px; height: 14px; flex: none; }
+.spin { animation: spin 0.9s linear infinite; transform-origin: 50% 50%; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hint { margin-top: 28px; font-size: 10px; color: var(--text-dim); opacity: 0.6; }
+.cursor { display: inline-block; width: 0.55em; height: 1em; background: var(--accent); vertical-align: -0.1em; margin-left: 4px; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }

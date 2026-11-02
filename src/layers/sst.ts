@@ -40,7 +40,8 @@ export function mountOceanRasters(map: maplibregl.Map, grid: GridMeta) {
     map.addSource('pelagos-land', { type: 'geojson', data: dataUrl('land.geojson') })
     map.addLayer({ id: 'pelagos-land', type: 'fill', source: 'pelagos-land', paint: { 'fill-color': LAND_COLOR } }, before)
     map.addLayer(
-      { id: 'pelagos-coast', type: 'line', source: 'pelagos-land', paint: { 'line-color': 'rgba(57,213,255,0.35)', 'line-width': 0.7 } },
+      // minzoom：高空時隱藏，否則看得到 land.geojson 的裁切邊框
+      { id: 'pelagos-coast', type: 'line', source: 'pelagos-land', minzoom: 2.4, paint: { 'line-color': 'rgba(57,213,255,0.35)', 'line-width': 0.7 } },
       before,
     )
   }
