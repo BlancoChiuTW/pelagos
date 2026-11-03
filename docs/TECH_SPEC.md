@@ -407,3 +407,13 @@ interface AppState {
 - 航次補登以原生 details 按需展開；座標／時間／漁獲錯誤有訊息，成功後停用按鈕直到修改欄位。表格排序、事件、來源卡可用鍵盤操作。
 - 海溫預設透明度 0.30；模型、網格與色階不改。尚未實作的熱區開關停用並標「規劃中」。
 - `scripts/ux-check.mjs` 使用獨立 Chromium context 驗證操作與 IndexedDB 留存，輸出各頁與桌面尺寸截圖；無頭 SwiftShader 不作真機效能驗收。
+
+### 19.7 V05 使用者授權的互動精修（2026-11-03）
+
+- MapContext 管理三種圖層預設及實際資料期間；仍使用 store.layers 作單一真實狀態，手動調整後預設按鈕會取消選中。
+- FeatureCard 顯示港口或 ActivityCluster，點擊由 layerStack 的 pick handler 傳回 App；不新增圖上文字。選船清除標記詳情，選標記清除選船，總覽復位一併清除。
+- Hud 手機抽屜提供三個高度，選中項目時展開詳情；Sidebar 更多入口提供全部六模組。
+- Alerts 的分類與處理狀態獨立篩選，徽章只計未處理且非 info。DataHub 區分來源與匯入，來源清單旁呈現所選來源細節。
+- useOcean 共用資源載入器提供 loading／ok／error、20 秒逾時與 retry；舊請求在卸載或重試後不覆寫新結果。網格是必要資料，其他 GFW 資料可降級。
+- profileDrafts 僅暫存未儲存主檔，跨頁／船保留；儲存後清除草稿，關閉／重整前提醒。正式資料仍由 overrides／IndexedDB 負責。
+- 驗證：npm run verify、scripts/ux-check.mjs、scripts/ux-v05.mjs；後者使用獨立瀏覽器 context 和網路攔截模擬 503，不操作使用者現有資料。

@@ -18,6 +18,8 @@ import { HOUR } from './sim/geo'
 import { STATUS_LABEL } from './sim/status'
 import { useStore } from './store'
 import { useTicker } from './useTicker'
+import { FeatureCard, type Feature } from './hud/FeatureCard'
+import { MapContext } from './hud/MapContext'
 import { Hud } from './hud/Hud'
 import { Sidebar } from './hud/Sidebar'
 import { Toolbar } from './hud/Toolbar'
@@ -37,6 +39,7 @@ import { Alerts } from './pages/Alerts'
 import { Buoys } from './pages/Buoys'
 import { activityAlerts, buildAlerts } from './sim/alerts'
 import { DataHub } from './pages/DataHub'
+import { useProfileDrafts } from './data/profileDrafts'
 import { useOverrides } from './data/overrides'
 import type { Alert } from './data/types'
 
@@ -65,11 +68,22 @@ const tooltip = (info: PickingInfo) => {
 }
 
 export default function App() {
+  const dirty = useProfileDrafts(s => Object.keys(s.drafts).length > 0)
+  useEffect(() => {
+    if (!dirty) return
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [dirty])
   const [h, setHandles] = useState<MapHandles | null>(null)
+  const [feature, setFeature] = useState<Feature | null>(null)
   const ocean = useOcean()
-  const gfw = useFishingEffort()
-  const portStats = usePorts()
-  const activityData = useActivity()
+  const fishingSource = useFishingEffort()
+  const portsSource = usePorts()
+  const eventsSource = useActivity()
+  const gfw = fishingSource.state === 'ok' ? fishingSource.data : null
+  const portStats = portsSource.state === 'ok' ? portsSource.data : null
+  const activityData = eventsSource.state === 'ok' ? eventsSource.data : null
   const activity = useMemo(() => activityData?.events ?? [], [activityData])
   const ports = useMemo(() => portStats?.ports ?? [], [portStats])
   const gfwGear = useStore((s) => s.gfwGear)
@@ -84,6 +98,8 @@ export default function App() {
   const othersCount = useStore((s) => s.othersCount)
   const selectedId = useStore((s) => s.selectedVesselId)
   const selectVessel = useStore((s) => s.selectVessel)
+  useEffect(() => { if (selectedId) setFeature(null) }, [selectedId])
+  const onFeature = useCallback((f: Feature) => { selectVessel(null); setFeature(f) }, [selectVessel])
   const now = useStore((s) => s.time.now)
 
   // 開機序列：依進度逐層點亮（X01）
@@ -97,9 +113,9 @@ export default function App() {
   }, [h, grid])
   useEffect(() => {
     if (!h || !grid) return
-    setRasterVisible(h.map, 'sst', rawFlags.sst && stage >= 1)
-    setRasterVisible(h.map, 'anomaly', rawFlags.anomaly && stage >= 1, 0.7)
-  }, [h, grid, rawFlags.sst, rawFlags.anomaly, stage])
+    setRasterVisible(h.map, 'sst', rawFlags.sst && stage >= 1, selectedId ? 0.16 : 0.30)
+    setRasterVisible(h.map, 'anomaly', rawFlags.anomaly && stage >= 1, selectedId ? 0.25 : 0.7)
+  }, [h, grid, rawFlags.sst, rawFlags.anomaly, stage, selectedId])
 
   const live = useTicker(500)
   const scrub = useStore((s) => s.scrub)
@@ -116,6 +132,9 @@ export default function App() {
   useEffect(() => {
     if (h && grid) showGfw(h.map, gfw, gfwGear, layerFlags.gfw)
   }, [h, grid, gfw, gfwGear, layerFlags.gfw])
+  useEffect(() => {
+    if (h?.map.getLayer('pelagos-gfw')) h.map.setPaintProperty('pelagos-gfw', 'raster-opacity', layerFlags.gfw ? selectedId ? 0.2 : 0.65 : 0)
+  }, [h, gfw, gfwGear, layerFlags.gfw, selectedId])
   const t = scrub ?? live // 回放時用回放時間（F12）
   const zoom = useMapZoom(h?.map ?? null)
   const snap = useFleetSnapshot(grid, now)
@@ -156,6 +175,7 @@ export default function App() {
     else if (a.lon !== undefined && a.lat !== undefined) h?.map.flyTo({ center: [a.lon, a.lat], zoom: 6 })
   }
   const goBuoy = (lon: number, lat: number) => {
+    setFeature(null)
     const st = useStore.getState()
     st.setView('map')
     st.setLayer('buoys', true)
@@ -164,8 +184,8 @@ export default function App() {
   }
 
   const layers = useMemo<Layer[]>(
-    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, trackStart, t, imports, ports, activity }),
-    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, trackStart, t, imports, ports, activity],
+    () => buildLayers({ layers: layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, onSelect: selectVessel, onFeature, trackStart, t, imports, ports, activity }),
+    [layerFlags, zoom, fleet, others, buoys, selectedId, selectedEvents, selectVessel, onFeature, trackStart, t, imports, ports, activity],
   )
   const introDone = useCallback(() => setIntro('done'), [setIntro])
   const bootSteps = [
@@ -182,10 +202,12 @@ export default function App() {
       </div>
       {h && grid && <CurrentsCanvas map={h.map} canvas={h.fxCanvas} grid={grid} enabled={rawFlags.currents && stage >= 2 && onMap} maxParticles={fxLow ? 3000 : 6000} />}
       <div style={{ opacity: stage >= 5 ? 1 : 0, transition: 'opacity 0.6s', position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        <div style={{ position: 'absolute', bottom: 85, left: 'var(--workspace-left)', pointerEvents: 'auto', zIndex: 30 }}>{[['捕魚熱度', fishingSource], ['港口', portsSource], ['活動', eventsSource]].map(([name, source]) => typeof source !== 'string' && source.state === 'error' ? <div key={String(name)} role="alert" style={{ padding: 12, background: '#182d3f', borderRadius: 10 }}>{String(name)}載入失敗 <button onClick={source.retry}>重試 {String(name)}</button></div> : null)}</div>
         <Sidebar alerts={alertCount} />
-        {onMap && <MapControls map={h?.map ?? null} />}
+        {onMap && <MapControls map={h?.map ?? null} onReset={() => setFeature(null)} />}
         <Toolbar key={view} fleet={fleet} layers={<LayerPanel gears={gfw?.gears ?? []} />} info={<InfoPanel grid={grid} />} />
-        <Hud
+        {onMap && <MapContext grid={grid} gfw={gfw} ports={portStats} activity={activityData} />}
+        <Hud selectionKey={feature ? ('name' in feature ? feature.name : feature.events.map(e => e.id).join(',')) : selectedId ?? undefined}
           page={onMap ? undefined : view === 'vessels' ? <Vessels fleet={fleet} now={t} /> : view === 'trips' && snap ? <Trips fleet={fleet} snap={snap} now={t} onEvent={goEvent} />
               : view === 'alerts' ? <Alerts alerts={alerts} onLocate={locateAlert} />
               : view === 'buoys' && snap ? <Buoys snap={snap} fleet={fleet} trackStart={trackStart} now={t} onGo={goBuoy} />
@@ -193,7 +215,7 @@ export default function App() {
               : <Placeholder view={view} />}
           right={
             <AnimatePresence mode="wait">
-              {selected && grid ? (
+              {feature ? <FeatureCard key="feature" feature={feature} onClose={() => setFeature(null)} /> : selected && grid ? (
                 <VesselCard key={selected.vessel.id} item={selected} events={selectedEvents} grid={grid} onEvent={flyToEvent} />
               ) : snap ? (
                 <div key="overview" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--gap)', minHeight: 0, flex: 1 }}>
@@ -207,7 +229,7 @@ export default function App() {
           bottomLeft={demoMode ? <PerfHud points={points} fps={fps} /> : undefined}
         />
       </div>
-      {intro !== 'done' && <BootSequence map={h?.map ?? null} steps={bootSteps} onDone={introDone} />}
+      {intro !== 'done' && <BootSequence map={h?.map ?? null} steps={bootSteps} onDone={introDone} error={ocean.state === 'error' ? ocean.error : undefined} onRetry={ocean.retry} />}
     </>
   )
 }

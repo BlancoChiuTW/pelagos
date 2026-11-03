@@ -16,6 +16,8 @@ export function Sidebar({ alerts }: { alerts: number }) {
   const view = useStore((st) => st.view)
   const setView = useStore((st) => st.setView)
   const online = useStore((st) => st.online)
+  const [more, setMore] = useState(false)
+  useEffect(() => { const close = (e: KeyboardEvent) => { if (e.key === 'Escape') setMore(false) }; window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close) }, [])
   const [now, setNow] = useState(Date.now())
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 10_000)
@@ -32,11 +34,13 @@ export function Sidebar({ alerts }: { alerts: number }) {
       <div className={s.caption}>工作空間</div>
       <div className={s.navItems}>
         {ITEMS.map((it) => (
-          <button key={it.view} className={s.item} title={it.label} aria-label={it.label} aria-current={view === it.view ? 'page' : undefined} data-mobile={it.view === 'buoys' || it.view === 'data' ? 'hide' : undefined} onClick={() => setView(it.view)}>
+          <button key={it.view} className={s.item} title={it.label} aria-label={it.label} aria-current={view === it.view ? 'page' : undefined} data-mobile={it.view === 'buoys' || it.view === 'data' ? 'hide' : undefined} onClick={() => { setView(it.view); setMore(false) }}>
             {Icon[it.icon]}<span className={s.itemLabel}>{it.label}</span>
             {it.view === 'alerts' && alerts > 0 && <span className={s.badge}>{alerts}</span>}
           </button>
         ))}
+        <button className={s.more} aria-expanded={more} aria-label="更多模組" onClick={() => setMore(!more)}>•••<span>更多</span></button>
+        {more && <div className={s.moreMenu}><button onClick={() => { setView('buoys'); setMore(false) }}>FAD 浮標</button><button onClick={() => { setView('data'); setMore(false) }}>資料串接</button><button onClick={() => setMore(false)}>關閉</button></div>}
       </div>
       <div className={s.spacer} />
       <div className={s.demo}><span>探索中的營運提案</span><small>模擬船隊 · 真實海況</small></div>

@@ -16,3 +16,15 @@
   .bottom, .bottomLeft { display: none; }
   .page { top: calc(var(--header-height) + 16px + env(safe-area-inset-top)); left: 10px; right: 10px; bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 10px); }
 }
+.drawerBar { display: none; }
+.drawerBody { display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: auto; }
+@media (max-width: 640px) {
+ .right[data-drawer] { max-height: none; height: 220px; background: #101e2bf5; border: 1px solid var(--sep); border-radius: 16px; }
+ .right[data-drawer=collapsed] { height: 42px; }
+ .right[data-drawer=detail] { height: 65dvh; }
+ .drawerBar { display: flex; flex-shrink: 0; padding: 5px; gap: 5px; }
+ .drawerBar button { flex: 1; padding: 6px; border: 0; border-radius: 8px; background: transparent; color: var(--label-2); }
+ .drawerBar button[aria-pressed=true] { color: var(--tint); background: #7ddbd31c; }
+ .drawerBody > * { flex-shrink: 0; }
+ .right[data-drawer=collapsed] .drawerBody { display: none; }
+}

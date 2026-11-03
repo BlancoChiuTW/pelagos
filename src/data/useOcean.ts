@@ -1,46 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { dataSource } from './DataSource'
-import type { ActivityEvents, FishingEffort, OceanGrid, PortStats } from './types'
 
 export type Loadable<T> = { state: 'loading' } | { state: 'ok'; data: T } | { state: 'error'; error: string }
-
-/** 載入海況網格；失敗不丟例外，交給畫面顯示（PRD 穩定性要求） */
-export function useOcean(): Loadable<OceanGrid> {
-  const [v, setV] = useState<Loadable<OceanGrid>>({ state: 'loading' })
+function useResource<T>(load: () => Promise<T>) {
+  const [value, setValue] = useState<Loadable<T>>({ state: 'loading' })
+  const [attempt, setAttempt] = useState(0)
+  const retry = useCallback(() => setAttempt(n => n + 1), [])
   useEffect(() => {
     let alive = true
-    dataSource
-      .loadOcean()
-      .then((data) => alive && setV({ state: 'ok', data }))
-      .catch((e: unknown) => alive && setV({ state: 'error', error: e instanceof Error ? e.message : String(e) }))
-    return () => {
-      alive = false
-    }
-  }, [])
-  return v
+    setValue({ state: 'loading' })
+    const timeout = setTimeout(() => {
+      if (alive) { alive = false; setValue({ state: 'error', error: '連線逾時，請重試' }) }
+    }, 20000)
+    load().then(data => { if (alive) setValue({ state: 'ok', data }) })
+      .catch((e: unknown) => { if (alive) setValue({ state: 'error', error: e instanceof Error ? e.message : String(e) }) })
+      .finally(() => clearTimeout(timeout))
+    return () => { alive = false; clearTimeout(timeout) }
+  }, [load, attempt])
+  return { ...value, retry }
 }
-
-/** 周邊漁船活動（GFW）；載入失敗只關掉這層 */
-export function useFishingEffort(): FishingEffort | null {
-  const [v, setV] = useState<FishingEffort | null>(null)
-  useEffect(() => {
-    dataSource.loadFishingEffort().then(setV).catch(() => setV(null))
-  }, [])
-  return v
-}
-
-export function usePorts(): PortStats | null {
-  const [v, setV] = useState<PortStats | null>(null)
-  useEffect(() => {
-    dataSource.loadPorts().then(setV).catch(() => setV(null))
-  }, [])
-  return v
-}
-
-export function useActivity(): ActivityEvents | null {
-  const [v, setV] = useState<ActivityEvents | null>(null)
-  useEffect(() => {
-    dataSource.loadActivity().then(setV).catch(() => setV(null))
-  }, [])
-  return v
-}
+const ocean = () => dataSource.loadOcean()
+const fishing = () => dataSource.loadFishingEffort()
+const ports = () => dataSource.loadPorts()
+const activity = () => dataSource.loadActivity()
+export const useOcean = () => useResource(ocean)
+export const useFishingEffort = () => useResource(fishing)
+export const usePorts = () => useResource(ports)
+export const useActivity = () => useResource(activity)

@@ -4,8 +4,9 @@ import { useStore } from '../store'
 import { Icon } from './icons'
 import s from './MapControls.module.css'
 
-export function MapControls({ map }: { map: MapLibreMap | null }) {
+export function MapControls({ map, onReset }: { map: MapLibreMap | null; onReset?: () => void }) {
   const reset = () => {
+    onReset?.()
     useStore.getState().selectVessel(null)
     map?.easeTo({ ...homeView(), duration: 900 })
   }

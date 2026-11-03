@@ -1,0 +1,8 @@
+.context { z-index: 3; position: absolute; top: calc(var(--header-height) + 14px); left: var(--workspace-left); pointer-events: auto; max-width: min(390px, calc(100vw - var(--sidebar-width) - 420px)); font-size: 12px; }
+.presets { display: flex; padding: 4px; gap: 4px; border: 1px solid var(--sep); border-radius: 12px; background: #101e2bef; }
+.presets button { flex: 1; white-space: nowrap; border: 0; border-radius: 8px; padding: 9px 12px; background: transparent; color: var(--label-2); cursor: pointer; }
+.presets button[aria-pressed=true] { color: var(--tint); background: #7ddbd31c; }
+.periods, .notice { margin-top: 8px; padding: 9px 12px; border-radius: 10px; background: #101e2bf2; color: var(--label-2); line-height: 1.7; }
+.periods summary { cursor: pointer; }
+.notice { color: var(--tint); }
+@media (max-width: 640px) { .context { left: 10px; top: calc(var(--header-height) + 8px); max-width: calc(100vw - 20px); } .periods { max-width: 300px; } }

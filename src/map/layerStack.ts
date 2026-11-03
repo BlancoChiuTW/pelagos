@@ -1,5 +1,5 @@
 // 依狀態組出 deck.gl 圖層（下 → 上，TECH_SPEC §6.2）。只在輸入變動時重組。
-import type { Layer } from '@deck.gl/core'
+import type { Layer, PickingInfo } from '@deck.gl/core'
 import type { FleetItem } from '../data/useFleet'
 import type { OthersFrame } from '../sim/useOthers'
 import type { AppState } from '../store'
@@ -14,6 +14,8 @@ import type { ActivityEvent, Port } from '../data/types'
 import type { ImportLayer } from '../data/overrides'
 import type { Epoch, TripEvent } from '../data/types'
 
+import type { Feature } from '../hud/FeatureCard'
+
 export interface StackInput {
   layers: AppState['layers']
   zoom: number
@@ -24,6 +26,7 @@ export interface StackInput {
   /** 選中船的航次事件 */
   selectedEvents: TripEvent[]
   onSelect: (id: string) => void
+  onFeature: (feature: Feature) => void
   trackStart: Epoch
   t: Epoch
   imports: ImportLayer[]
@@ -35,8 +38,8 @@ export function buildLayers(i: StackInput): Layer[] {
   const out: Layer[] = []
   if (i.layers.others && i.others) out.push(createOthersLayer(i.others, i.zoom))
   if (i.layers.buoys && i.buoys) out.push(createBuoyLayer(i.buoys, i.zoom))
-  if (i.layers.ports && i.ports.length) out.push(...createPortLayers(i.ports, i.zoom))
-  if (i.layers.activity && i.activity.length) out.push(...createActivityLayers(i.activity, i.layers.aisgap, i.zoom))
+  if (i.layers.ports && i.ports.length) out.push(...createPortLayers(i.ports, i.zoom).map(l => l.clone({ opacity: i.selectedId ? 0.3 : 1, onClick: (p: PickingInfo) => { if (p.object) i.onFeature(p.object as Feature) } })))
+  if (i.layers.activity && i.activity.length) out.push(...createActivityLayers(i.activity, i.layers.aisgap, i.zoom).map(l => l.clone({ opacity: i.selectedId ? 0.3 : 1, onClick: (p: PickingInfo) => { if (p.object) i.onFeature(p.object as Feature) } })))
   if (i.imports.length) out.push(...createImportLayers(i.imports, i.zoom))
   const sel = i.fleet.find((f) => f.vessel.id === i.selectedId)
   if (sel) out.push(...createTripTrackLayers(sel.track, i.selectedEvents))

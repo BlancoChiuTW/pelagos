@@ -68,3 +68,8 @@
   .table td, .table th { padding-inline: 8px; }
   .h1 { font-size: 24px; line-height: 30px; }
 }
+.sourceGrid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 8px 24px; }
+.sourceButton { grid-column: 1; border: 1px solid var(--sep); border-radius: 10px; padding: 12px; background: transparent; text-align: left; color: var(--label); cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
+.sourceButton[aria-pressed=true] { background: #7ddbd316; border-color: var(--tint); }
+.sourceDetail { grid-column: 2; grid-row: 1 / span 5; min-width: 0; padding: 16px; background: #ffffff03; border-radius: 12px; }
+@media (max-width: 640px) { .sourceGrid { grid-template-columns: 1fr; } .sourceDetail { grid-column: 1; grid-row: 6; } .sourceButton { padding: 10px; } }

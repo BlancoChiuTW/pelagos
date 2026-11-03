@@ -1,6 +1,7 @@
 // 船舶管理（M01）：表格（搜尋／篩選／排序）＋船舶主檔（可編輯、存 IndexedDB）＋到地圖定位
 import { useMemo, useState } from 'react'
 import { fmtLat, fmtLon } from '../data/grid'
+import { useProfileDrafts } from '../data/profileDrafts'
 import { useOverrides } from '../data/overrides'
 import type { FleetItem } from '../data/useFleet'
 import { VESSEL_TYPE_LABEL } from '../sim/labels'
@@ -81,12 +82,16 @@ function ProfileEditor({ item }: { item: FleetItem }) {
   const setView = useStore((st) => st.setView)
   const select = useStore((st) => st.selectVessel)
   const base = defaultProfile(item.vessel)
-  const [draft, setDraft] = useState<VesselProfile>({ ...base, ...saved })
+  const pending = useProfileDrafts(s => s.drafts[item.vessel.id])
+  const draft = pending ?? { ...base, ...saved }
+  const setDraft = (v: VesselProfile) => useProfileDrafts.getState().put(item.vessel.id, v)
+  const clear = () => useProfileDrafts.getState().clear(item.vessel.id)
   const [ok, setOk] = useState(false)
   return (
     <div>
       <div className={s.section}>{item.vessel.name}</div>
       <div className={s.sub} style={{ marginBottom: 12 }}>{VESSEL_TYPE_LABEL[item.vessel.type]} · {item.vessel.fleet} · 船籍 {item.vessel.flag}{saved ? ' · 已編輯' : ''}</div>
+      {pending && <p role="status" className={s.sub}>尚未儲存 · 切換模組會保留草稿（重新整理前請儲存） <button className={s.btn} onClick={clear}>捨棄草稿</button></p>}
       <div className={s.form}>
         {PROFILE_FIELDS.map((f) => (
           <label key={f.key} className={`${s.field} ${f.key === 'satPhone' ? s.full : ''}`}>
@@ -96,7 +101,7 @@ function ProfileEditor({ item }: { item: FleetItem }) {
         ))}
       </div>
       <div className={s.actions}>
-        <button className={`${s.btn} ${s.primary}`} onClick={() => { save(item.vessel.id, draft); setOk(true) }}>儲存</button>
+        <button className={`${s.btn} ${s.primary}`} onClick={() => { save(item.vessel.id, draft); clear(); setOk(true) }}>儲存</button>
         <button className={s.btn} onClick={() => { setView('map'); select(item.vessel.id) }}>在地圖上檢視</button>
         {ok && <span className={s.toast} role="status">已儲存至此瀏覽器</span>}
       </div>

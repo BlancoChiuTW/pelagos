@@ -55,7 +55,7 @@ export interface AppState {
 
 export const useStore = create<AppState>()((set) => ({
   // v3 減法：預設只開船隊＋航跡，海溫淡化當背景（PRD §15.3）
-  layers: { sst: true, anomaly: false, currents: false, buoys: false, others: false, fleet: true, hotspot: false, track: true, gfw: true, ports: true, activity: true, aisgap: false, eez: true },
+  layers: { sst: true, anomaly: false, currents: false, buoys: false, others: false, fleet: true, hotspot: false, track: true, gfw: false, ports: false, activity: false, aisgap: false, eez: false },
   view: 'map',
   gfwGear: 'pelagic',
   setGfwGear: (gfwGear) => set({ gfwGear }),

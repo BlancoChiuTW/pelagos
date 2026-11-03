@@ -22,18 +22,15 @@ const day = (iso?: string) => (iso ? iso.slice(0, 10) : '—')
 type Key = 'noaa' | 'gfw' | 'vms' | 'fad' | 'elog'
 function Connector({ name, kind, status, rows, active, onClick }: { name: string; kind: string; status: [string, string]; rows: [string, string][]; active: boolean; onClick: () => void }) {
   return (
-    <div role="button" tabIndex={0} aria-pressed={active} aria-label={name} onClick={onClick} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }} style={{ padding: 18, borderRadius: 12, cursor: 'pointer', background: active ? 'rgba(125,219,211,.06)' : 'rgba(255,255,255,.02)', border: `1px solid ${active ? 'rgba(125,219,211,.4)' : 'var(--sep)'}` }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <b style={{ font: 'var(--t-headline)' }}>{name}</b>
-        <span className={s.chip} style={{ color: status[1], marginLeft: 'auto' }}>{status[0]}</span>
-      </div>
-      <div className={s.dim} style={{ marginBottom: 8 }}>{kind}</div>
-      <dl className={s.kv}>{rows.map(([k, v]) => <Fragment key={k}><dt>{k}</dt><dd>{v}</dd></Fragment>)}</dl>
-    </div>
+    <>
+      <button className={s.sourceButton} aria-label={name} aria-pressed={active} onClick={onClick}><b>{name}</b><small style={{ color: status[1] }}>{status[0]}</small></button>
+      {active && <section className={s.sourceDetail} aria-label={name + ' 詳情'}><h2 className={s.h1}>{name}</h2><p className={s.sub}>{kind}</p><dl className={s.kv}>{rows.map(([k, v]) => <Fragment key={k}><dt>{k}</dt><dd>{v}</dd></Fragment>)}</dl></section>}
+    </>
   )
 }
 
 export function DataHub({ grid, snap, now, fleet, trackStart, gfw }: { grid: OceanGrid | null; snap: FleetSnapshot | null; now: number; fleet: FleetItem[]; trackStart: number; gfw: FishingEffort | null }) {
+  const [section, setSection] = useState<'sources' | 'import'>('sources')
   const imports = useOverrides((o) => o.imports)
   const addImport = useOverrides((o) => o.addImport)
   const removeImport = useOverrides((o) => o.removeImport)
@@ -120,14 +117,16 @@ export function DataHub({ grid, snap, now, fleet, trackStart, gfw }: { grid: Oce
   )
 
   return (
-    <div className={s.page}>
+    <div className={s.page} style={section === 'sources' ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}>
       <Panel className={s.main} style={{ overflowY: 'auto' }}>
         <div className={s.head}><div><h1 className={s.h1}>資料串接</h1><div className={s.sub}>檢視來源、驗證回報，將不同格式的資料匯入同一張地圖。</div></div></div>
-        <div className={s.connectors}>
+        <div className={s.seg} style={{ marginBottom: 18 }}><button aria-pressed={section === 'sources'} onClick={() => setSection('sources')}>資料來源</button><button aria-pressed={section === 'import'} onClick={() => setSection('import')}>匯入檔案</button></div>
+        {section === 'sources' && <>
+        <div className={s.sourceGrid}>
           <Connector active={active === 'noaa'} onClick={() => setActive('noaa')} name="NOAA 海況" kind="海溫 OISST v2.1 · 洋流 NESDIS SSH · ERDDAP" status={['已同步', 'var(--green)']}
             rows={[['海溫資料日', day(grid?.meta.sst.time)], ['洋流資料日', day(grid?.meta.u.time)], ['更新方式', '每日排程（GitHub Actions 跑 Python ETL）'], ['格式', 'Int16 網格＋PNG，跨換日線']]} />
           <Connector active={active === 'gfw'} onClick={() => setActive('gfw')} name="Global Fishing Watch" kind="周邊漁船活動 · AIS 表觀捕魚努力量（4Wings API）"
-            status={gfw?.mode === 'live' ? ['已同步', 'var(--green)'] : ['模擬・待 token', 'var(--orange)']}
+            status={!gfw ? ['未就緒', 'var(--orange)'] : gfw.mode === 'live' ? ['已同步', 'var(--green)'] : ['模擬', 'var(--orange)']}
             rows={[['資料期間', gfw ? `${gfw.dateRange[0]} ～ ${gfw.dateRange[1]}` : '—'], ['網格', gfw ? `${gfw.cells.length.toLocaleString()} 格 · ${gfw.resolution}` : '—'], ['更新方式', '每日排程（ETL 呼叫 GFW API）'], ['授權', '非商業用途，需 API token']]} />
           <Connector active={active === 'vms'} onClick={() => setActive('vms')} name="VMS 船位" kind="衛星船位回報（模擬）" status={['接收中', 'var(--green)']}
             rows={[['格式', 'NAF（North Atlantic Format）'], ['最後接收', vms.log[0] ? fmtTime(vms.log[0].at) : lastVms ? fmtTime(lastVms) : '—'], ['本次接收', `${vms.log.length} 筆`], ['正式來源', '漁業署 VMS／船上回報']]} />
@@ -188,6 +187,8 @@ body: { "geojson": 西／中太平洋多邊形（跨換日線拆兩塊） }
           )}
         </div>
 
+        </>}
+        {section === 'import' && <>
         <div className={s.section} style={{ marginTop: 24 }}>匯入檔案</div>
         <label onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) load(f) }}
           style={{ display: 'block', padding: 28, borderRadius: 12, border: '1.5px dashed var(--sep)', textAlign: 'center', cursor: 'pointer', color: 'var(--label-2)' }}>
@@ -212,8 +213,9 @@ body: { "geojson": 西／中太平洋多邊形（跨換日線拆兩塊） }
             <div className={s.actions}><button className={`${s.btn} ${s.primary}`} onClick={commit}>加入地圖</button><button className={s.btn} onClick={() => setFile(null)}>取消</button></div>
           </>
         )}
+        </>}
       </Panel>
-      <Panel className={s.side}>
+      {section === 'import' && <Panel className={s.side}>
         <div className={s.section}>已匯入圖層</div>
         {!imports.length && <div className={s.dim}>尚無。匯入後會出現在戰情地圖（橘色點）。</div>}
         {imports.map((l) => (
@@ -226,7 +228,7 @@ body: { "geojson": 西／中太平洋多邊形（跨換日線拆兩塊） }
         <div className={s.section} style={{ marginTop: 28 }}>示範資料</div>
         <div className={s.dim} style={{ marginBottom: 10 }}>清除所有編輯、手動事件、已處理警示與匯入圖層（存在這台電腦的瀏覽器）。現在：{fmtTime(now)}</div>
         <button className={`${s.btn} ${s.danger}`} onClick={() => confirm('確定要重設示範資料？') && reset()}>重設示範資料</button>
-      </Panel>
+      </Panel>}
     </div>
   )
 }

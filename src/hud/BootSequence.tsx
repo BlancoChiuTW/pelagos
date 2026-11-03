@@ -18,7 +18,7 @@ function Mark({ ok }: { ok: boolean }) {
   )
 }
 
-export function BootSequence({ map, steps, onDone }: { map: maplibregl.Map | null; steps: Step[]; onDone: () => void }) {
+export function BootSequence({ map, steps, onDone, error, onRetry }: { map: maplibregl.Map | null; steps: Step[]; onDone: () => void; error?: string; onRetry: () => void }) {
   const overlay = useRef<HTMLDivElement>(null)
   const [title, setTitle] = useState('')
   const [sub, setSub] = useState('')
@@ -94,6 +94,7 @@ export function BootSequence({ map, steps, onDone }: { map: maplibregl.Map | nul
             <i style={{ width: `${(steps.slice(0, shown).filter((x) => x.ok).length / steps.length) * 100}%` }} />
           </div>
         )}
+        {error && <div role="alert"><p>海況資料載入失敗：{error}</p><button onClick={onRetry}>重試海況資料</button></div>}
         {typed && <div className={s.hint}>{ready ? '按任意鍵略過' : '資料載入中…'}</div>}
       </div>
     </div>

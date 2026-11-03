@@ -12,7 +12,9 @@ export function Alerts({ alerts, onLocate }: { alerts: Alert[]; onLocate: (a: Al
   const ack = useOverrides((o) => o.ack)
   const setAck = useOverrides((o) => o.setAck)
   const [all, setAll] = useState(false)
-  const rows = all ? alerts : alerts.filter((a) => !ack[a.id])
+  const [category, setCategory] = useState<'attention' | 'info'>('attention')
+  const pending = alerts.filter(a => !ack[a.id])
+  const rows = alerts.filter(a => (all || !ack[a.id]) && (category === 'info' ? a.level === 'info' : a.level !== 'info'))
   const open = alerts.filter((a) => !ack[a.id]).length
   return (
     <Panel style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -21,6 +23,7 @@ export function Alerts({ alerts, onLocate }: { alerts: Alert[]; onLocate: (a: Al
         <div className={s.grow} />
         <div className={s.seg}><button aria-pressed={!all} onClick={() => setAll(false)}>未處理</button><button aria-pressed={all} onClick={() => setAll(true)}>全部</button></div>
       </div>
+      <div className={s.seg} style={{ margin: '0 20px 16px', alignSelf: 'flex-start' }}><button aria-pressed={category === 'attention'} onClick={() => setCategory('attention')}>需處理 {pending.filter(a => a.level !== 'info').length}</button><button aria-pressed={category === 'info'} onClick={() => setCategory('info')}>一般通知 {pending.filter(a => a.level === 'info').length}</button></div>
       <div className={s.scroll}>
         <table className={s.table}>
           <thead><tr><th>等級</th><th>內容</th><th>時間</th><th /></tr></thead>
@@ -38,7 +41,7 @@ export function Alerts({ alerts, onLocate }: { alerts: Alert[]; onLocate: (a: Al
             ))}
           </tbody>
         </table>
-        {!rows.length && <div className={s.empty}>沒有未處理的警示</div>}
+        {!rows.length && <div className={s.empty}>此分類沒有符合條件的警示</div>}
       </div>
     </Panel>
   )

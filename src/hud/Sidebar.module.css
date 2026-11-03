@@ -41,3 +41,9 @@
   .item[data-mobile='hide'] { display: none; }
   .badge { position: absolute; top: 2px; left: calc(50% + 6px); right: auto; min-width: 16px; padding: 0 4px; background: var(--red); color: #fff; }
 }
+.more, .moreMenu { display: none; }
+@media (max-width: 640px) {
+ .more { display: flex; flex: 1; flex-direction: column; justify-content: center; align-items: center; border: 0; background: none; color: var(--label-2); gap: 3px; }
+ .moreMenu { display: flex; flex-direction: column; position: absolute; bottom: calc(100% + 8px); right: 10px; padding: 8px; border-radius: 12px; border: 1px solid var(--sep); background: #101e2b; min-width: 160px; }
+ .moreMenu button { background: transparent; border: 0; color: var(--label); text-align: left; padding: 14px; }
+}
